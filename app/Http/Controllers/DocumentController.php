@@ -65,6 +65,7 @@ class DocumentController extends Controller
      */
     public function store(Request $request)
     {
+
         $this->authorize('create', Document::class);
 
         $request->validate([
@@ -73,16 +74,26 @@ class DocumentController extends Controller
             'document_number' => 'nullable|string|max:255',
             'document_date' => 'required|date',
             'description' => 'nullable|string',
-            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,jpg,png,zip,rar|max:10240',
+            'file' => 'required|file|mimes:pdf,doc,docx,xls,xlsx,jpg,png,zip,rar|max:51200',
             'physical_location_building' => 'nullable|string|max:255',
             'physical_location_cabinet' => 'nullable|string|max:255',
             'physical_location_rack' => 'nullable|string|max:255',
             'physical_location_box' => 'nullable|string|max:255',
         ]);
 
-        $file = $request->file('file');
-        $fileName = time() . '_' . $file->getClientOriginalName();
-        $filePath = $file->storeAs('documents', $fileName, 'public');
+            $file = $request->file('file');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $file->storeAs('documents', $fileName, 'public');
+
+            $user = Auth::user();
+            $status = 'Menunggu Review';
+            $approved_by = null;
+
+            // PERBAIKAN LOGIKA: Cek apakah pengguna memiliki role 'isAdmin'
+            if ($user->can('isAdmin')) {
+                $status = 'Diarsip';
+                $approved_by = $user->id;
+            }
 
         Document::create([
             'category_id' => $request->category_id,
@@ -94,7 +105,8 @@ class DocumentController extends Controller
             'stored_path' => $filePath,
             'file_size' => $file->getSize(),
             'uploaded_by' => Auth::id(),
-            'status' => 'Menunggu Review',
+            'status' => $status,
+            'approved_by' => $approved_by,
             'classification' => 'Biasa',
             'physical_location_building' => $request->physical_location_building,
             'physical_location_cabinet' => $request->physical_location_cabinet,
@@ -106,7 +118,7 @@ class DocumentController extends Controller
     }
 
     /**
-     * Menampilkan detail satu dokumen spesifik.
+     * Menampilkan detail satu dokumen spesifik
      */
     public function show(Document $document)
     {

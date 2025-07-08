@@ -10,10 +10,24 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('role', 'entity')->paginate(10); // Tambahkan relasi 'entity'
-        return view('pages.users.index', compact('users'));
+        $search = $request->input('search');
+
+        $query = User::with('role', 'entity')->latest();
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%')
+                ->orWhere('nip', 'like', '%' . $search . '%')
+                ->orWhere('jabatan', 'like', '%' . $search . '%');
+            });
+        }
+
+        $users = $query->paginate(10);
+
+        return view('pages.users.index', compact('users', 'search'));
     }
 
     public function create()

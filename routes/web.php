@@ -18,7 +18,7 @@ use App\Models\AuditTrail;
 use App\Http\Controllers\EntityController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('auth.login');
 });
 
 Route::get('/dashboard', function () {
@@ -76,7 +76,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/review-documents', [DocumentController::class, 'reviewList'])->name('documents.reviewList');
         Route::patch('/documents/{document}/approve', [DocumentController::class, 'approve'])->name('documents.approve');
         Route::patch('/documents/{document}/reject', [DocumentController::class, 'reject'])->name('documents.reject');
-        Route::patch('/documents/{document}/destroy', [DocumentController::class, 'destroy'])->name('documents.destroy');
+        Route::delete('/documents/{document}/destroy', [DocumentController::class, 'destroy'])->name('documents.destroy');
+        
         Route::get('/document-requests/{documentRequest}/entity/{entity}', [DocumentRequestController::class, 'showEntityUploads'])->name('document-requests.show-entity-uploads');
         Route::get('/client-submissions', [DocumentController::class, 'clientSubmissions'])->name('documents.client_submissions');
         Route::get('/client-submissions/{document}', [DocumentController::class, 'showClientSubmission'])->name('client-submissions.show');

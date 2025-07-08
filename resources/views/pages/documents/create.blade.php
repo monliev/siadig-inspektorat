@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Unggah Dokumen Baru') }}
+            {{ __('Unggah Dokumen Internal Baru') }}
         </h2>
     </x-slot>
 
@@ -9,6 +9,17 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    
+                    @if ($errors->any())
+                        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                            <strong class="font-bold">Terjadi kesalahan!</strong>
+                            <ul class="mt-2 list-disc list-inside">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
                     {{-- Form untuk unggah dokumen --}}
                     <form action="{{ route('documents.store') }}" method="POST" enctype="multipart/form-data">
@@ -68,7 +79,7 @@
 
                         <div class="mb-4">
                             <label for="file" class="block text-sm font-medium text-gray-700">Pilih File</label>
-                            <input type="file" name="file" id="file" class="mt-1 block w-full" required>
+                            <input type="file" name="file" id="file" class="mt-1 block w-full" required accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.zip,.rar">
                         </div>
 
                         <div class="flex items-center justify-end mt-4">

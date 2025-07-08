@@ -32,6 +32,7 @@ class Document extends Model
         'physical_location_rack',
         'physical_location_box',
         'document_request_id',
+        'approved_by',
     ];
 
     /**

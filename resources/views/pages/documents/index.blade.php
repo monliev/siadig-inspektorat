@@ -101,15 +101,16 @@
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="text-center py-3 px-4">
+                                        <td class="py-3 px-4">
                                             <div class="flex items-center justify-center space-x-2">
                                                 <a href="{{ route('documents.show', $document->id) }}" class="text-sm bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded">Detail</a>
-                                                
+
                                                 @can('update', $document)
                                                     <a href="{{ route('documents.edit', $document->id) }}" class="text-sm bg-yellow-500 hover:bg-yellow-700 text-white py-1 px-2 rounded">Edit</a>
                                                 @endcan
 
                                                 @can('delete', $document)
+                                                    {{-- Pastikan Form Hapus Anda Persis Seperti Ini --}}
                                                     <form action="{{ route('documents.destroy', $document->id) }}" method="POST" onsubmit="return confirm('Anda yakin ingin menghapus dokumen ini?');">
                                                         @csrf
                                                         @method('DELETE')
