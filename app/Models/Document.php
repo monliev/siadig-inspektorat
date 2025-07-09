@@ -55,4 +55,20 @@ class Document extends Model
     {
         return $this->belongsTo(DocumentRequest::class);
     }
+
+    /**
+     * Relasi ke entitas pengirim (From).
+     */
+    public function fromEntity(): BelongsTo
+    {
+        return $this->belongsTo(Entity::class, 'from_entity_id');
+    }
+
+    /**
+     * Relasi ke entitas tujuan (To).
+     */
+    public function toEntity(): BelongsTo
+    {
+        return $this->belongsTo(Entity::class, 'to_entity_id');
+    }
 }

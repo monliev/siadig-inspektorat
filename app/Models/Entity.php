@@ -11,7 +11,7 @@ class Entity extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'type', 'parent_id'];
+    protected $fillable = ['name', 'type', 'parent_id', 'agency_code'];
 
     /**
      * Relasi ke entitas induk (parent).

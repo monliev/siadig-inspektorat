@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\AuditTrail;
 use App\Models\Document;
 use App\Models\DocumentCategory;
+use App\Models\Entity;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -57,7 +59,11 @@ class DocumentController extends Controller
     {
         $this->authorize('create', Document::class);
         $categories = DocumentCategory::where('scope', 'internal')->orderBy('name')->get();
-        return view('pages.documents.create', compact('categories'));
+        
+        // Ambil data entitas untuk dropdown
+        $entities = Entity::orderBy('agency_code')->get();
+        
+        return view('pages.documents.create', compact('categories', 'entities'));
     }
 
     /**
@@ -79,6 +85,9 @@ class DocumentController extends Controller
             'physical_location_cabinet' => 'nullable|string|max:255',
             'physical_location_rack' => 'nullable|string|max:255',
             'physical_location_box' => 'nullable|string|max:255',
+            'from_entity_id' => 'required_if:correspondence_type,incoming', // Wajib jika surat masuk
+            'external_sender_name' => 'required_if:from_entity_id,is_external', // Wajib jika pengirim eksternal
+            'to_entity_id' => 'required_if:correspondence_type,outgoing', // Wajib jika surat keluar
         ]);
 
             $file = $request->file('file');
@@ -112,6 +121,10 @@ class DocumentController extends Controller
             'physical_location_cabinet' => $request->physical_location_cabinet,
             'physical_location_rack' => $request->physical_location_rack,
             'physical_location_box' => $request->physical_location_box,
+            // Simpan data korespondensi baru
+            'from_entity_id' => $request->from_entity_id === 'is_external' ? null : $request->from_entity_id,
+            'to_entity_id' => $request->to_entity_id,
+            'external_sender_name' => $request->from_entity_id === 'is_external' ? $request->external_sender_name : null,
         ]);
 
         return redirect()->route('documents.index')->with('success', 'Dokumen berhasil diunggah.');

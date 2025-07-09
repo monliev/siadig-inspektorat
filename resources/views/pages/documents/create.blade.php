@@ -55,6 +55,55 @@
                             <textarea name="description" id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
                         </div>
 
+                        {{-- Bagian Korespondensi --}}
+                        <div>
+                            <h3 class="text-lg font-medium text-gray-900">Informasi Korespondensi</h3>
+                            <div class="mt-4 space-y-4">
+                                <div class="flex items-center">
+                                    <input id="type_outgoing" name="correspondence_type" type="radio" value="outgoing" class="h-4 w-4 text-indigo-600 border-gray-300" checked>
+                                    <label for="type_outgoing" class="ms-3 block text-sm font-medium text-gray-700">Surat Keluar / Dokumen Internal</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="type_incoming" name="correspondence_type" type="radio" value="incoming" class="h-4 w-4 text-indigo-600 border-gray-300">
+                                    <label for="type_incoming" class="ms-3 block text-sm font-medium text-gray-700">Surat Masuk</label>
+                                </div>
+                            </div>
+
+                            {{-- Form untuk Surat Keluar/Internal --}}
+                            <div id="outgoing_fields" class="mt-4 space-y-4">
+                                <div>
+                                    <label for="to_entity_id" class="block text-sm font-medium text-gray-700">Tujuan Dokumen</label>
+                                    <select name="to_entity_id" id="to_entity_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        <option value="">-- Pilih Tujuan --</option>
+                                        @foreach ($entities as $entity)
+                                            <option value="{{ $entity->id }}">{{ $entity->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            {{-- Form untuk Surat Masuk --}}
+                            <div id="incoming_fields" class="mt-4 space-y-4" style="display: none;">
+                                <div>
+                                    <label for="from_entity_id" class="block text-sm font-medium text-gray-700">Pengirim Dokumen</label>
+                                    <select name="from_entity_id" id="from_entity_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                        <option value="">-- Pilih Pengirim --</option>
+                                        @foreach ($entities as $entity)
+                                            <option value="{{ $entity->id }}">
+                                                {{-- PERUBAHAN DI SINI --}}
+                                                {{ $entity->name }} @if($entity->agency_code) ({{ $entity->agency_code }}) @endif
+                                            </option>
+                                        @endforeach
+                                        <option value="is_external">-- Pengirim dari Luar Pemkab --</option>
+                                    </select>
+                                </div>
+                                <div id="external_sender_field" style="display: none;">
+                                    <label for="external_sender_name" class="block text-sm font-medium text-gray-700">Nama Pengirim Eksternal</label>
+                                    <input type="text" name="external_sender_name" id="external_sender_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="border-t border-b border-gray-200 py-4 my-4">
                         <h3 class="text-base font-semibold text-gray-800 mb-2">Lokasi Fisik (Opsional)</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -93,4 +142,42 @@
             </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const correspondenceTypeRadios = document.querySelectorAll('input[name="correspondence_type"]');
+            const outgoingFields = document.getElementById('outgoing_fields');
+            const incomingFields = document.getElementById('incoming_fields');
+            const fromEntitySelect = document.getElementById('from_entity_id');
+            const externalSenderField = document.getElementById('external_sender_field');
+
+            function toggleFields() {
+                if (document.getElementById('type_incoming').checked) {
+                    incomingFields.style.display = 'block';
+                    outgoingFields.style.display = 'none';
+                } else {
+                    incomingFields.style.display = 'none';
+                    outgoingFields.style.display = 'block';
+                }
+            }
+
+            function toggleExternalSender() {
+                if (fromEntitySelect.value === 'is_external') {
+                    externalSenderField.style.display = 'block';
+                } else {
+                    externalSenderField.style.display = 'none';
+                }
+            }
+
+            correspondenceTypeRadios.forEach(radio => radio.addEventListener('change', toggleFields));
+            fromEntitySelect.addEventListener('change', toggleExternalSender);
+
+            // Initial state
+            toggleFields();
+            toggleExternalSender();
+        });
+    </script>
+    @endpush
+    
 </x-app-layout>

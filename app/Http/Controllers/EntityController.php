@@ -40,6 +40,7 @@ class EntityController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|in:OPD,Kecamatan,Desa',
             'parent_id' => 'nullable|exists:entities,id',
+            'agency_code' => 'nullable|string|max:255|unique:entities,agency_code', // <-- Tambahkan ini
         ]);
 
         Entity::create($request->all());
@@ -52,12 +53,13 @@ class EntityController extends Controller
         return view('pages.entities.edit', compact('entity', 'parentEntities'));
     }
 
-    public function update(Request $request, Entity $entity)
+     public function update(Request $request, Entity $entity)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:OPD,Kecamatan,Desa',
             'parent_id' => 'nullable|exists:entities,id',
+            'agency_code' => 'nullable|string|max:255|unique:entities,agency_code,' . $entity->id, // <-- Tambahkan ini
         ]);
 
         $entity->update($request->all());

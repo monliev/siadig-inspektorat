@@ -38,6 +38,7 @@
                             <thead class="bg-gray-200">
                                 <tr>
                                     <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Nama OPD (Entitas)</th>
+                                    <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Kode Instansi</th>
                                     <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Tipe</th>
                                     <th class="text-left py-3 px-4 uppercase font-semibold text-sm">OPD Induk</th>
                                     <th class="text-center py-3 px-4 uppercase font-semibold text-sm">Aksi</th>
@@ -47,6 +48,7 @@
                                 @forelse ($entities as $entity)
                                     <tr class="border-b hover:bg-gray-50">
                                         <td class="py-3 px-4">{{ $entity->name }}</td>
+                                        <td class="py-3 px-4">{{ $entity->agency_code ?? '-' }}</td>
                                         <td class="py-3 px-4">{{ $entity->type }}</td>
                                         <td class="py-3 px-4">{{ $entity->parent->name ?? '-' }}</td>
                                         <td class="py-3 px-4">
