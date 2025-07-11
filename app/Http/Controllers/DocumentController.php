@@ -6,6 +6,7 @@ use App\Models\AuditTrail;
 use App\Models\Document;
 use App\Models\DocumentCategory;
 use App\Models\Entity;
+use App\Models\User;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -150,7 +151,13 @@ class DocumentController extends Controller
             ->take(10)
             ->get();
 
-        return view('pages.documents.show', compact('document', 'activities'));
+        // Ambil daftar pengguna internal untuk tujuan disposisi
+        $internalUsers = User::whereHas('role', function($q){
+            $q->where('name', '!=', 'Klien Eksternal');
+        })->orderBy('name')->get();
+
+        // Tambahkan $internalUsers ke data yang dikirim ke view
+        return view('pages.documents.show', compact('document', 'activities', 'internalUsers')); 
     }
 
     public function showClientSubmission(Document $document)
@@ -173,8 +180,13 @@ class DocumentController extends Controller
             ->take(10)
             ->get();
 
-        // Arahkan ke view baru yang khusus untuk review klien
-        return view('pages.documents.show-client-submission', compact('document', 'activities'));
+        // Ambil daftar pengguna internal untuk tujuan disposisi
+        $internalUsers = User::whereHas('role', function($q){
+            $q->where('name', '!=', 'Klien Eksternal');
+        })->orderBy('name')->get();
+
+        // Tambahkan $internalUsers ke data yang dikirim ke view
+        return view('pages.documents.show-client-submission', compact('document', 'activities', 'internalUsers')); 
     }
 
     /**

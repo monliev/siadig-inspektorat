@@ -3,22 +3,23 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\View; // <-- Tambahkan ini
+use Illuminate\Support\Facades\Auth; // <-- Tambahkan ini
+use App\Models\Disposition; // <-- Tambahkan ini
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
-    public function register(): void
-    {
-        //
-    }
+    public function register(): void { /* ... */ }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        //
+        View::composer('*', function ($view) {
+            if (Auth::check()) {
+                $unreadDispositionsCount = Disposition::where('to_user_id', Auth::id())
+                                                      ->where('status', 'Terkirim')
+                                                      ->count();
+                $view->with('unreadDispositionsCount', $unreadDispositionsCount);
+            }
+        });
     }
 }

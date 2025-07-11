@@ -46,6 +46,7 @@ class UserController extends Controller
             'entity_id' => 'nullable|exists:entities,id',
             'nip' => 'nullable|string|max:20|unique:users,nip',
             'jabatan' => 'nullable|string|max:255',
+            'phone_number' => 'nullable|string|max:20',
         ]);
 
         User::create([
@@ -56,6 +57,7 @@ class UserController extends Controller
             'nip' => $request->nip,
             'jabatan' => $request->jabatan,
             'password' => Hash::make('TrenggalekMeroket#!'),
+            'phone_number' => $request->phone_number,
         ]);
 
         return redirect()->route('users.index')->with('success', 'Pengguna baru berhasil ditambahkan.');
@@ -77,6 +79,7 @@ class UserController extends Controller
             'entity_id' => 'nullable|exists:entities,id', 
             'nip' => 'nullable|string|max:20|unique:users,nip,' . $user->id,
             'jabatan' => 'nullable|string|max:255',
+            'phone_number' => 'nullable|string|max:20',
         ]);
 
         $user->update([
@@ -86,6 +89,7 @@ class UserController extends Controller
             'entity_id' => $request->entity_id,
             'nip' => $request->nip,
             'jabatan' => $request->jabatan,
+            'phone_number' => $request->phone_number,
         ]);
 
         return redirect()->route('users.index')->with('success', 'Data pengguna berhasil diperbarui.');

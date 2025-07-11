@@ -71,4 +71,9 @@ class Document extends Model
     {
         return $this->belongsTo(Entity::class, 'to_entity_id');
     }
+
+    public function dispositions(): HasMany
+    {
+        return $this->hasMany(Disposition::class);
+    }
 }

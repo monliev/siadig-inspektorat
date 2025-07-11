@@ -22,6 +22,18 @@
                     <x-nav-link :href="route('documents.index')" :active="request()->routeIs('documents.index') && !request()->routeIs('documents.reviewList')">
                         {{ __('Arsip Internal') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('dispositions.index')" :active="request()->routeIs('dispositions.index')">
+                        {{ __('Disposisi Masuk') }}
+                        {{-- Penanda Notifikasi --}}
+                        @if(isset($unreadDispositionsCount) && $unreadDispositionsCount > 0)
+                            <span class="ms-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                                {{ $unreadDispositionsCount }}
+                            </span>
+                        @endif
+                    </x-nav-link>
+                    <x-nav-link :href="url('/dispositions-sent')" :active="request()->is('dispositions-sent')">
+                        Disposisi Keluar
+                    </x-nav-link>
                     {{-- Menu Khusus Admin --}}
                     @can('isAdmin')
                         <x-nav-link :href="route('documents.reviewList')" :active="request()->routeIs('documents.reviewList')">

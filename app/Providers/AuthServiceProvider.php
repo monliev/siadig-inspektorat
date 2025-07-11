@@ -18,6 +18,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Document::class => DocumentPolicy::class,
+        Disposition::class => DispositionPolicy::class,
     ];
 
     /**
@@ -53,6 +54,19 @@ class AuthServiceProvider extends ServiceProvider
             if (!$user->role) { return true; }
             // Cek langsung berdasarkan nama role, bukan memanggil gate lain
             return strtolower(trim($user->role->name)) !== 'klien eksternal';
+        });
+
+        Gate::define('can-disposition', function (User $user) {
+            if (!$user->role) {
+                return false;
+            }
+            // Izinkan jika rolenya adalah salah satu dari ini
+            return in_array($user->role->name, [
+                'Super Admin',
+                'Admin Arsip',
+                'Pejabat Struktural',
+                'Auditor'
+            ]);
         });
     }
 }

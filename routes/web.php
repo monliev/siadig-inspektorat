@@ -10,6 +10,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DocumentCategoryController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DispositionController;
 
 use App\Models\DocumentRequest;
 use App\Models\Document;
@@ -57,6 +58,12 @@ Route::middleware('auth')->group(function () {
     // Route untuk semua pengguna yang sudah login
     Route::resource('documents', DocumentController::class)->except(['destroy']);
     Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
+    Route::post('/documents/{document}/dispositions', [DispositionController::class, 'store'])->name('dispositions.store');
+    Route::get('/dispositions', [DispositionController::class, 'index'])->name('dispositions.index');
+    Route::patch('/dispositions/{disposition}/complete', [DispositionController::class, 'markAsCompleted'])->name('dispositions.complete');
+    Route::get('/dispositions/{disposition}', [DispositionController::class, 'show'])->name('dispositions.show');
+    Route::post('/dispositions/{disposition}/responses', [DispositionController::class, 'storeResponse'])->name('dispositions.responses.store');
+    Route::get('/dispositions-sent', [DispositionController::class, 'sent'])->name('dispositions.sent');
 
     // ROUTE UNTUK KLIEN EKSTERNAL
     Route::middleware(['auth', 'can:isClient'])->group(function () {

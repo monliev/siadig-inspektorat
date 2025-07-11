@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,7 @@ class User extends Authenticatable
         'entity_id',
         'nip',
         'jabatan',
+        'phone_number',
     ];
 
     /**
@@ -64,5 +66,20 @@ class User extends Authenticatable
     public function createdDocumentRequests(): HasMany
     {
         return $this->hasMany(DocumentRequest::class, 'created_by');
+    }
+
+    public function sentDispositions(): HasMany
+    {
+        return $this->hasMany(Disposition::class, 'from_user_id');
+    }
+
+    public function receivedDispositions(): HasMany
+    {
+        return $this->hasMany(Disposition::class, 'to_user_id');
+    }
+
+     public function dispositionResponses(): HasMany
+    {
+        return $this->hasMany(DispositionResponse::class);
     }
 }
