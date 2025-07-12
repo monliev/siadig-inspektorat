@@ -2,27 +2,21 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+// Ganti 'use Illuminate\Database\Eloquent\Model;' dengan ini:
+use Spatie\Permission\Models\Role as SpatieRole;
 
-class Role extends Model
+// Ganti 'class Role extends Model' dengan ini:
+class Role extends SpatieRole
 {
-    use HasFactory;
-
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-    // TAMBAHKAN BAGIAN INI
     protected $fillable = [
         'name',
         'description',
+        'guard_name', // Pastikan guard_name ada di sini
     ];
 
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class);
-    }
 }

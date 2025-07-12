@@ -24,6 +24,25 @@
                             <textarea name="description" id="description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">{{ old('description', $role->description) }}</textarea>
                         </div>
 
+                        <hr>
+                        <h4>Hak Akses (Permissions)</h4>
+
+                        @if($role->name === 'Super Admin')
+                            <div class="alert alert-info mt-3">
+                                Super Admin memiliki akses penuh ke semua fitur secara default dan tidak dapat diubah.
+                            </div>
+                        @else
+                            <div class="form-group mt-3">
+                                @foreach($permissions as $permission)
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="checkbox" name="permissions[]" id="perm-{{ $permission->id }}" value="{{ $permission->name }}"
+                                            {{ in_array($permission->name, $rolePermissions) ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="perm-{{ $permission->id }}">{{ $permission->name }}</label>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
                         <div class="flex items-center justify-end mt-4">
                             <a href="{{ route('roles.index') }}" class="text-gray-600 hover:text-gray-800 mr-4">Batal</a>
                             <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">

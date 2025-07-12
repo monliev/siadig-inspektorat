@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Permission;
 
 class RoleController extends Controller
 {
@@ -39,6 +40,7 @@ class RoleController extends Controller
         Role::create([
             'name' => $request->name,
             'description' => $request->description,
+            'guard_name' => 'web' // <-- TAMBAHKAN BARIS INI
         ]);
 
         // Kembali ke halaman daftar dengan pesan sukses
@@ -58,27 +60,23 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        return view('pages.roles.edit', compact('role'));
+        $permissions = Permission::all();
+        $rolePermissions = $role->permissions->pluck('name')->toArray();
+        return view('pages.roles.edit', compact('role', 'permissions', 'rolePermissions'));
     }
 
-    /**
-     * Menyimpan perubahan pada role.
-     */
     public function update(Request $request, Role $role)
     {
-        // Validasi input
         $request->validate([
             'name' => 'required|string|max:50|unique:roles,name,' . $role->id,
             'description' => 'nullable|string',
+            'permissions' => 'nullable|array',
         ]);
 
-        // Update data di database
-        $role->update([
-            'name' => $request->name,
-            'description' => $request->description,
-        ]);
+        $role->update($request->only('name', 'description'));
+        $role->syncPermissions($request->input('permissions', []));
 
-        return redirect()->route('roles.index')->with('success', 'Role berhasil diperbarui.');
+        return redirect()->route('roles.index')->with('success', 'Role dan hak akses berhasil diperbarui.');
     }
 
     /**

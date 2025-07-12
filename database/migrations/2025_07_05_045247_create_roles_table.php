@@ -8,6 +8,7 @@ return new class extends Migration {
         Schema::create('roles', function (Blueprint $table) {
             $table->id();
             $table->string('name', 50);
+            $table->string('guard_name')->default('web');
             $table->text('description')->nullable();
             $table->timestamps(); // <-- TAMBAHKAN BARIS INI
         });
