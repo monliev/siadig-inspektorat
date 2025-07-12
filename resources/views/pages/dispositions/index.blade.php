@@ -31,9 +31,9 @@
                         @forelse ($dispositions as $disposition)
                             <tr class="border-b {{ $disposition->status == 'Selesai' ? 'bg-gray-50 text-gray-500' : 'hover:bg-gray-50' }}">
                                 <td class="py-3 px-4">
-                                    <a href="{{ route('dispositions.show', $disposition->id) }}" class="{{ $disposition->status == 'Selesai' ? 'text-gray-500' : 'text-blue-600 hover:text-blue-800' }}">
-                                        {{ $disposition->document->title }}
-                                    </a>
+                                <a href="{{ route('dispositions.show', ['disposition' => $disposition->id, 'return_to' => 'inbox']) }}" class="text-blue-600 hover:text-blue-800">
+                                    {{ $disposition->document->title }}
+                                </a>
                                 </td>
                                 <td class="py-3 px-4">{{ \Illuminate\Support\Str::limit($disposition->instructions, 50) }}</td>
                                 <td class="py-3 px-4">{{ $disposition->fromUser->name }}</td>
@@ -54,9 +54,6 @@
                                     </span>
                                 </td>
                                 <td class="text-center py-3 px-4">
-                                    {{-- ============================================= --}}
-                                    {{--         PERBAIKAN TOMBOL DENGAN MODAL         --}}
-                                    {{-- ============================================= --}}
                                     @if ($disposition->status !== 'Selesai')
                                         <div x-data="{ open: false }">
                                             <button @click="open = true" class="text-sm bg-green-500 hover:bg-green-700 text-white py-1 px-2 rounded">

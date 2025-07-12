@@ -24,15 +24,15 @@
                         </div>
                         <div class="mb-4">
                             <label for="nip" class="block text-sm font-medium text-gray-700">NIP (Opsional)</label>
-                            <input type="text" name="nip" id="nip" value="{{ old('nip', $user->nip ?? '') }}" class="mt-1 block w-full ...">
+                            <input type="text" name="nip" id="nip" value="{{ old('nip', $user->nip ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                         </div>
                         <div class="mb-4">
                             <label for="jabatan" class="block text-sm font-medium text-gray-700">Jabatan (Opsional)</label>
-                            <input type="text" name="jabatan" id="jabatan" value="{{ old('jabatan', $user->jabatan ?? '') }}" class="mt-1 block w-full ...">
+                            <input type="text" name="jabatan" id="jabatan" value="{{ old('jabatan', $user->jabatan ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                         </div>
                         <div class="mb-4">
                             <label for="phone_number" class="block text-sm font-medium text-gray-700">Nomor WhatsApp (Opsional)</label>
-                            <input type="text" name="phone_number" id="phone_number" value="{{ old('phone_number', $user->phone_number ?? '') }}" class="mt-1 block w-full ..." placeholder="Contoh: 6281234567890">
+                            <input type="text" name="phone_number" id="phone_number" value="{{ old('phone_number', $user->phone_number ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Contoh: 6281234567890">
                         </div>
                         {{-- Dropdown Role --}}
                         <div class="mb-4">

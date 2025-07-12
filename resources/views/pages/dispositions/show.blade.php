@@ -16,7 +16,7 @@
                 <div class="flex justify-between items-start flex-wrap gap-4">
                     {{-- Informasi Disposisi --}}
                     <div>
-                        <a href="{{ url()->previous() }}" class="text-blue-600 hover:text-blue-800 font-semibold mb-4 inline-block">&larr; Kembali</a>
+                        <a href="{{ route('dispositions.index') }}" class="text-blue-600 hover:text-blue-800 font-semibold mb-4 inline-block">&larr; Kembali</a>
                         <h3 class="text-lg font-medium text-gray-900">Instruksi dari: {{ $disposition->fromUser->name }}</h3>
                         <p class="mt-1 text-sm text-gray-600">Terkait Dokumen: 
                             <a href="{{ route('documents.show', $disposition->document_id) }}" class="text-blue-600 hover:underline" target="_blank">
@@ -87,6 +87,7 @@
                                     </ul>
                                 </div>
                             @endif
+
                         </div>
                     @empty
                         <div class="text-center py-4">
@@ -96,23 +97,51 @@
                 </div>
             </div>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Beri Tanggapan / Laporan Progres</h3>
-                <form action="{{ route('dispositions.responses.store', $disposition->id) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="mb-4">
-                        <label for="notes" class="block text-sm font-medium text-gray-700">Catatan / Laporan Anda</label>
-                        <textarea name="notes" id="notes" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required></textarea>
+            @if ($disposition->status !== 'Selesai')
+                {{-- Jika disposisi BELUM selesai, tampilkan form tanggapan untuk penerima --}}
+                @can('createResponse', $disposition)
+                    <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Beri Tanggapan / Laporan Progres</h3>
+                        <form action="{{ route('dispositions.responses.store', $disposition->id) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <form action="{{ route('dispositions.responses.store', $disposition->id) }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="mb-4">
+                                <label for="notes" class="block text-sm font-medium text-gray-700">Catatan / Laporan Anda</label>
+                                <textarea name="notes" id="notes" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required></textarea>
+                            </div>
+                            <div class="mb-4">
+                                <label for="attachments" class="block text-sm font-medium text-gray-700">Lampirkan File (Opsional)</label>
+                                <input type="file" name="attachments[]" id="attachments" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" multiple>
+                            </div>
+                            <div class="flex justify-end mt-4">
+                                <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">Kirim Tanggapan</button>
+                            </div>
+                        </form>
+                        </form>
                     </div>
-                    <div class="mb-4">
-                        <label for="attachments" class="block text-sm font-medium text-gray-700">Lampirkan File (Opsional)</label>
-                        <input type="file" name="attachments[]" id="attachments" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" multiple>
+                @endcan
+            @else
+                {{-- ============================================= --}}
+                {{--     JIKA SUDAH SELESAI, TAMPILKAN BLOK INI     --}}
+                {{-- ============================================= --}}
+                <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Penutup Disposisi</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-sm text-gray-600">
+                            <span>Status:</span>
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Selesai
+                            </span>
+                        </div>
+                        <div class="mt-2 p-4 bg-green-50 border border-green-200 rounded-md">
+                            <p class="text-sm font-medium text-green-800">Catatan Penutupan:</p>
+                            <p class="text-gray-700 whitespace-pre-wrap">{{ $disposition->closing_note ?? 'Tidak ada catatan penutupan.' }}</p>
+                        </div>
                     </div>
-                    <div class="flex justify-end mt-4">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">Kirim Tanggapan</button>
-                    </div>
-                </form>
-            </div>
+                </div>
+            @endif
+            
         </div>
     </div>
 </x-app-layout>

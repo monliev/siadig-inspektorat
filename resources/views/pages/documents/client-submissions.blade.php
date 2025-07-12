@@ -24,7 +24,7 @@
                                 <input type="text" name="search" placeholder="Cari judul atau nama entitas..." value="{{ request('search') }}" class="w-full rounded-md border-gray-300 shadow-sm">
                             </div>
                             <div>
-                                <button type="submit" class="w-full justify-center inline-flex items-center px-4 py-2 bg-gray-800 ...">Cari</button>
+                                <button type="submit" class="w-full justify-center inline-flex items-center px-4 py-2 bg-gray-800 rounded-md font-semibold text-white uppercase tracking-widest hover:bg-gray-500">Cari</button>
                             </div>
                         </div>
                     </form>

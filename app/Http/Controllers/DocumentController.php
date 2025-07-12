@@ -8,6 +8,7 @@ use App\Models\DocumentCategory;
 use App\Models\Entity;
 use App\Models\User;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -92,7 +93,11 @@ class DocumentController extends Controller
         ]);
 
             $file = $request->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
+            $originalName = $file->getClientOriginalName();
+            // Ganti spasi dengan underscore dan bersihkan karakter lain
+            $sanitizedName = preg_replace('/[^A-Za-z0-9\._-]/', '', str_replace(' ', '_', $originalName));
+            $fileName = time() . '_' . $sanitizedName;
+            
             $filePath = $file->storeAs('documents', $fileName, 'public');
 
             $user = Auth::user();
@@ -111,8 +116,8 @@ class DocumentController extends Controller
             'document_number' => $request->document_number,
             'document_date' => $request->document_date,
             'description' => $request->description,
-            'original_filename' => $file->getClientOriginalName(),
-            'stored_path' => $filePath,
+            'original_filename' => $originalName, // Simpan nama asli untuk ditampilkan
+            'stored_path' => $filePath, // Simpan path dengan nama yang sudah bersih
             'file_size' => $file->getSize(),
             'uploaded_by' => Auth::id(),
             'status' => $status,

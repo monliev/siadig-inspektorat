@@ -17,6 +17,22 @@ class Disposition extends Model
         'to_user_id',
         'instructions',
         'status',
+        'closing_note',
+        'response_token',
+        'token_expires_at',
+        'token_used_at',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    // TAMBAHKAN BLOK INI UNTUK MEMBERITAHU LARAVEL
+    // BAHWA KOLOM INI ADALAH OBJEK TANGGAL
+    protected $casts = [
+        'token_expires_at' => 'datetime',
+        'token_used_at' => 'datetime',
     ];
 
     public function document(): BelongsTo

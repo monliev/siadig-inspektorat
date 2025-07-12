@@ -4,9 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log; // <-- Tambahkan ini
+use Illuminate\Support\Str;
+
 use App\Models\Document;
-use App\Models\DocumentCategory; // <-- TAMBAHKAN INI
+use App\Models\DocumentCategory;
 use App\Models\DocumentRequest;
+use App\Services\WhatsAppService; // <-- Tambahkan ini
 
 class ClientDashboardController extends Controller
 {
@@ -55,22 +59,33 @@ class ClientDashboardController extends Controller
         ]);
 
         $file = $request->file('file');
-        $fileName = time() . '_' . $file->getClientOriginalName();
+        // --- PERBAIKAN NAMA FILE DI SINI ---
+        $originalName = $file->getClientOriginalName();
+        $sanitizedName = preg_replace('/[^A-Za-z0-9\._-]/', '', str_replace(' ', '_', $originalName));
+        $fileName = time() . '_' . $sanitizedName;
+
         $filePath = $file->storeAs('documents', $fileName, 'public');
 
-        Document::create([
-            'document_request_id' => $documentRequest->id, // <-- Tautkan ke ID Permintaan
+        $document = Document::create([
+            'document_request_id' => $documentRequest->id,
             'category_id' => $request->category_id,
             'title' => $request->title,
             'document_date' => $request->document_date,
             'description' => $request->description,
-            'original_filename' => $file->getClientOriginalName(),
-            'stored_path' => $filePath,
+            'original_filename' => $originalName, // Simpan nama asli
+            'stored_path' => $filePath, // Simpan path yang bersih
             'file_size' => $file->getSize(),
             'uploaded_by' => Auth::id(),
             'status' => 'Menunggu Review',
         ]);
 
-        return redirect()->route('client.dashboard')->with('success', 'Dokumen untuk permintaan "' . $documentRequest->title . '" berhasil diunggah.');
+        try {
+            $whatsapp = new WhatsAppService();
+            $whatsapp->sendClientSubmissionNotification($document);
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim notifikasi WA unggahan klien: ' . $e->getMessage());
+        }
+
+        return redirect()->route('client.dashboard')->with('success', 'Dokumen berhasil diunggah.');
     }
 }

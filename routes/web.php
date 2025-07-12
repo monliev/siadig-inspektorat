@@ -11,6 +11,7 @@ use App\Http\Controllers\DocumentCategoryController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DispositionController;
+use App\Http\Middleware\ValidateDispositionMagicLink;
 
 use App\Models\DocumentRequest;
 use App\Models\Document;
@@ -23,32 +24,45 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    // ---- Statistik Internal ----
-    $internalDocsCount = Document::whereNull('document_request_id')->count();
-    $internalCatsCount = DocumentCategory::where('scope', 'internal')->count();
-    $internalReviewCount = Document::whereNull('document_request_id')->where('status', 'Menunggu Review')->count();
+    $user = Auth::user();
+    $viewData = [];
+
+    // Data default untuk semua pengguna internal
+    $viewData['recentInternalDocuments'] = Document::with('category')
+        ->whereNull('document_request_id')
+        ->latest()->take(5)->get();
     
-    // ---- Statistik Eksternal (Kiriman Klien) ----
-    $totalRequestsCount = DocumentRequest::count(); // <-- DATA BARU
-    $externalDocsCount = Document::whereNotNull('document_request_id')->count();
-    $externalReviewCount = Document::whereNotNull('document_request_id')->where('status', 'Menunggu Review')->count();
+    $viewData['userActivities'] = AuditTrail::where('user_id', $user->id)
+        ->latest()->take(10)->get();
 
-    // ---- Daftar & Aktivitas ----
-    $recentDocuments = Document::with('category')->whereNull('document_request_id')->latest()->take(5)->get();
-    $userActivities = AuditTrail::where('user_id', Auth::id())->latest()->take(5)->get();
+    // Data khusus untuk Admin & Pejabat Struktural
+    if ($user->can('isAdmin') || $user->role->name === 'Pejabat Struktural') {
+        // Statistik Internal
+        $viewData['internalDocsCount'] = Document::whereNull('document_request_id')->count();
+        $viewData['internalCatsCount'] = DocumentCategory::where('scope', 'internal')->count();
+        $viewData['internalReviewCount'] = Document::whereNull('document_request_id')->where('status', 'Menunggu Review')->count();
+        
+        // Statistik Klien
+        $viewData['totalRequestsCount'] = DocumentRequest::count();
+        $viewData['externalDocsCount'] = Document::whereNotNull('document_request_id')->count();
+        $viewData['externalReviewCount'] = Document::whereNotNull('document_request_id')->where('status', 'Menunggu Review')->count();
 
-    return view('dashboard', compact(
-        'internalDocsCount',
-        'internalCatsCount',
-        'internalReviewCount',
-        'totalRequestsCount', // <-- Kirim data baru
-        'externalDocsCount',
-        'externalReviewCount',
-        'recentDocuments',
-        'userActivities'
-    ));
+        // Log Aktivitas Seluruh Pengguna (Hanya untuk Admin)
+        if ($user->can('isAdmin')) {
+             $viewData['allActivities'] = AuditTrail::with('user')->latest()->take(10)->get();
+        }
+    }
+
+    return view('dashboard', $viewData);
+
 })->middleware(['auth', 'verified', 'can:isInternalUser'])->name('dashboard');
 
+// LETAKKAN ROUTE INI DI LUAR GRUP AUTH
+Route::get('/disposition-response/{token}', [DispositionController::class, 'showViaMagicLink'])
+    ->middleware('signed')
+    ->name('dispositions.respond.magic');
+    // Route untuk menyimpan respons dari halaman publik
+Route::post('/disposition-response/store', [DispositionController::class, 'storePublicResponse'])->name('dispositions.respond.store');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
