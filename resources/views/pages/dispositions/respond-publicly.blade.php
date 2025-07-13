@@ -7,7 +7,8 @@
                 {{-- Informasi Disposisi --}}
                 <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
                     <p class="text-sm text-gray-500">Dari: <strong>{{ $disposition->fromUser->name }}</strong></p>
-                    <p class="text-sm text-gray-500">Terkait Dokumen: <strong>{{ $disposition->document->title }}</strong></p>
+                    <p class="text-sm text-gray-500">Terkait Dokumen:
+                        <strong>{{ $disposition->document->title }}</strong></p>
                     <hr class="my-2">
                     <p class="text-gray-700 whitespace-pre-wrap">{{ $disposition->instructions }}</p>
                 </div>
@@ -19,17 +20,23 @@
                     <input type="hidden" name="response_token" value="{{ $token }}">
 
                     <div class="mb-4">
-                        <label for="notes" class="block text-sm font-medium text-gray-700">Tanggapan / Laporan Progres</label>
-                        <textarea name="notes" id="notes" rows="5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required></textarea>
+                        <label for="notes" class="block text-sm font-medium text-gray-700">Tanggapan / Laporan
+                            Progres</label>
+                        <textarea name="notes" id="notes" rows="5"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required></textarea>
                     </div>
 
                     <div class="mb-4">
-                        <label for="attachments" class="block text-sm font-medium text-gray-700">Lampiran (Jika Ada)</label>
-                        <input type="file" name="attachments[]" id="attachments" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" multiple>
+                        <label for="attachments" class="block text-sm font-medium text-gray-700">Lampiran (Jika
+                            Ada)</label>
+                        <input type="file" name="attachments[]" id="attachments"
+                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            multiple>
                     </div>
 
                     <div class="flex justify-end mt-6">
-                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500">
+                        <button type="submit"
+                            class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500">
                             Kirim Tanggapan
                         </button>
                     </div>

@@ -15,6 +15,7 @@ use App\Http\Middleware\ValidateDispositionMagicLink;
 use App\Http\Controllers\RequiredDocumentController;
 use App\Http\Controllers\ServiceRequestController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\HelpController;
 
 use App\Models\DocumentRequest;
 use App\Models\Document;
@@ -25,6 +26,7 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\PortalController;
 
 Route::get('/', [PortalController::class, 'index'])->name('portal');
+Route::get('/bantuan', [HelpController::class, 'index'])->name('help.index');
 Route::get('/layanan/skbt', [ServiceRequestController::class, 'showSkbtLandingPage'])->name('skbt.landing');
 Route::get('login-skbt', [AuthenticatedSessionController::class, 'createSkbtLogin'])
                 ->middleware('guest')
