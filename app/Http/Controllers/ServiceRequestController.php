@@ -180,6 +180,11 @@ class ServiceRequestController extends Controller
         }
     }
 
+    public function showSkbtLandingPage()
+    {
+        return view('pages.service-requests.landing');
+    }
+
     /**
      * Memproses dokumen perbaikan yang diunggah oleh pemohon.
      */

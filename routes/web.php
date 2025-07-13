@@ -14,6 +14,7 @@ use App\Http\Controllers\DispositionController;
 use App\Http\Middleware\ValidateDispositionMagicLink;
 use App\Http\Controllers\RequiredDocumentController;
 use App\Http\Controllers\ServiceRequestController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 use App\Models\DocumentRequest;
 use App\Models\Document;
@@ -21,10 +22,13 @@ use App\Models\DocumentCategory;
 use App\Models\AuditTrail;
 use App\Http\Controllers\EntityController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\PortalController;
 
-Route::get('/', function () {
-    return view('auth.login');
-});
+Route::get('/', [PortalController::class, 'index'])->name('portal');
+Route::get('/layanan/skbt', [ServiceRequestController::class, 'showSkbtLandingPage'])->name('skbt.landing');
+Route::get('login-skbt', [AuthenticatedSessionController::class, 'createSkbtLogin'])
+                ->middleware('guest')
+                ->name('login.skbt');
 
 Route::get('register', [RegisteredUserController::class, 'create'])
                 ->middleware('guest')

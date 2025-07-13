@@ -1,28 +1,43 @@
 <x-guest-layout>
     <div class="flex items-center justify-center min-h-screen bg-gray-100">
         <div class="relative flex flex-col m-6 space-y-8 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0">
-            <div class="relative w-full md:w-1/2">
-                {{-- Ganti URL ini dengan URL gambar latar yang Anda inginkan --}}
-                <img src="https://dpmb.trenggalekkab.go.id/build/images/bg-tugu-trenggalek.jpg"
-                     alt="Gambar Latar" class="w-full h-full object-cover rounded-l-2xl" />
-                <div class="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 rounded-l-2xl"></div>
-                <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-between p-8 text-white">
-                    <div>
-                        <div class="flex items-center space-x-3">
-                            {{-- Menggunakan logo dari URL --}}
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Trenggalek_coat_of_arms.png/500px-Trenggalek_coat_of_arms.png" 
-                                alt="Logo Pemkab Trenggalek" 
-                                class="h-12 w-auto"> {{-- Anda bisa sesuaikan ukuran tinggi (h-12) --}}
+        <div class="relative w-full md:w-1/2">
+            <img id="hero-image"
+                src=""
+                alt="Gambar Latar"
+                class="w-full h-full object-cover rounded-l-2xl transition duration-500 ease-in-out" />
 
-                            <span class="font-bold text-lg text-white">E-Arsip Inspektorat</span>
-                        </div>
-                    </div>
-                    <div>
-                        <h2 class="text-2xl font-bold mb-1">Arsip Digital</h2>
-                        <p class="text-sm">Inspektorat Kabupaten Trenggalek</p>
+            <div class="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 rounded-l-2xl"></div>
+
+            <div class="absolute top-0 left-0 w-full h-full flex flex-col justify-between p-8 text-white">
+                <div>
+                    <div class="flex items-center space-x-3">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Trenggalek_coat_of_arms.png/500px-Trenggalek_coat_of_arms.png" 
+                            alt="Logo Pemkab Trenggalek" 
+                            class="h-12 w-auto">
+                        <span class="font-bold text-lg text-white">E-Arsip Inspektorat</span>
                     </div>
                 </div>
+                <div>
+                    <h2 class="text-2xl font-bold mb-1">Arsip Digital</h2>
+                    <p class="text-sm">Inspektorat Kabupaten Trenggalek</p>
+                </div>
             </div>
+        </div>
+
+        {{-- Script untuk mengganti gambar secara acak saat load --}}
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const images = [
+                    'https://dpmb.trenggalekkab.go.id/build/images/bg-tugu-trenggalek.jpg',
+                    'https://i.ibb.co/Y46D46LM/IMG-1512.jpg',
+                    'https://i.ibb.co/LhPQnqc2/IMG-1514.jpg'
+                ];
+
+                const randomImage = images[Math.floor(Math.random() * images.length)];
+                document.getElementById('hero-image').src = randomImage;
+            });
+        </script>
 
             <div class="flex flex-col justify-center p-8 md:p-14 w-full md:w-1/2">
                 <h2 class="font-bold text-2xl">Selamat Datang Kembali</h2>
@@ -71,6 +86,7 @@
                             {{ __('Masuk') }}
                         </x-primary-button>
                     </div>
+                    
                 </form>
                 @push('scripts')
                     {!! NoCaptcha::renderJs() !!}

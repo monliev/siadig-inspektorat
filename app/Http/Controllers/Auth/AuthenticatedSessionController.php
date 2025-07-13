@@ -21,6 +21,22 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
+     * Display the SKBT login view.
+     */
+    public function createSkbtLogin(): View // <-- TAMBAHKAN METHOD INI
+    {
+        return view('auth.login-skbt');
+    }
+
+    /**
+     * Display the external login view.
+     */
+    public function createExternal(): View  // <-- TAMBAHKAN METHOD INI
+    {
+        return view('auth.login-external');
+    }
+    
+    /**
      * Handle an incoming authentication request.
      */
     public function store(LoginRequest $request): RedirectResponse
