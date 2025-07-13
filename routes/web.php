@@ -12,16 +12,26 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DispositionController;
 use App\Http\Middleware\ValidateDispositionMagicLink;
+use App\Http\Controllers\RequiredDocumentController;
+use App\Http\Controllers\ServiceRequestController;
 
 use App\Models\DocumentRequest;
 use App\Models\Document;
 use App\Models\DocumentCategory;
 use App\Models\AuditTrail;
 use App\Http\Controllers\EntityController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 Route::get('/', function () {
     return view('auth.login');
 });
+
+Route::get('register', [RegisteredUserController::class, 'create'])
+                ->middleware('guest')
+                ->name('register');
+
+Route::post('register', [RegisteredUserController::class, 'store'])
+                ->middleware('guest');
 
 Route::get('/dashboard', function () {
     $user = Auth::user();
@@ -79,6 +89,31 @@ Route::middleware('auth')->group(function () {
     Route::post('/dispositions/{disposition}/responses', [DispositionController::class, 'storeResponse'])->name('dispositions.responses.store');
     Route::get('/dispositions-sent', [DispositionController::class, 'sent'])->name('dispositions.sent');
 
+    // Route untuk fitur permohonan bebas temuan
+    Route::get('/layanan/bebas-temuan/create', [ServiceRequestController::class, 'create'])->name('service-requests.create');
+    Route::post('/layanan/bebas-temuan', [ServiceRequestController::class, 'store'])->name('service-requests.store');
+    Route::post('/service-requests/{serviceRequest}/add-revision', [ServiceRequestController::class, 'addRevision'])->name('service-requests.addRevision');
+    Route::post('/service-requests/{serviceRequest}/submit-revision', [ServiceRequestController::class, 'submitRevision'])->name('service-requests.submitRevision');
+    Route::resource('service-requests', ServiceRequestController::class)->only([
+        'index', 'show', 'create', 'store'
+    ]);
+
+    // Grup untuk semua yang berhubungan dengan Service Request
+    Route::prefix('service-requests')->name('service-requests.')->group(function () {
+        
+        // Hanya yang punya izin 'view' bisa melihat daftar & detail
+        Route::get('/', [ServiceRequestController::class, 'index'])->name('index')->middleware('can:view-service-requests');
+        Route::get('/{serviceRequest}', [ServiceRequestController::class, 'show'])->name('show')->middleware('can:view-service-requests');
+        
+        // Hanya yang punya izin 'process' bisa melakukan revisi & approve
+        Route::post('/{serviceRequest}/add-revision', [ServiceRequestController::class, 'addRevision'])->name('addRevision')->middleware('can:process-service-requests');
+        Route::post('/{serviceRequest}/approve', [ServiceRequestController::class, 'approveRequest'])->name('approve')->middleware('can:process-service-requests');
+        
+        // Route untuk pemohon tidak perlu diubah karena sudah dicek di dalam controller
+        Route::get('/create', [ServiceRequestController::class, 'create'])->name('create');
+        Route::post('/', [ServiceRequestController::class, 'store'])->name('store');
+    });
+    
     // ROUTE UNTUK KLIEN EKSTERNAL
     Route::middleware(['auth', 'can:isClient'])->group(function () {
         Route::get('/client/dashboard', [ClientDashboardController::class, 'index'])->name('client.dashboard');
@@ -93,6 +128,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('entities', EntityController::class);
         Route::resource('document-requests', DocumentRequestController::class);
+        Route::resource('required-documents', RequiredDocumentController::class);
         
         Route::get('/review-documents', [DocumentController::class, 'reviewList'])->name('documents.reviewList');
         Route::patch('/documents/{document}/approve', [DocumentController::class, 'approve'])->name('documents.approve');

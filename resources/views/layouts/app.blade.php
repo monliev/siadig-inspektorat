@@ -5,7 +5,10 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        <title>@yield('title', 'Siadig - Sistem Administrasi Digital')</title>
+
+        <meta name="description" content="@yield('description', 'Siadig adalah solusi administrasi digital modern untuk mempercepat dan mempermudah layanan surat-menyurat dan pengelolaan data. Efisiensi dan kemudahan dalam satu sistem.')">
+        <meta name="keywords" content="@yield('keywords', 'siadig, administrasi digital, sistem informasi, layanan surat, e-government, manajemen data')">
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />

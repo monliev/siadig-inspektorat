@@ -117,4 +117,23 @@ class WhatsAppService
 
         Http::withHeaders(['X-Api-Key' => $this->apiKey])->post("{$this->baseUrl}/api/sendText", $payload);
     }
+
+    public function sendSimpleText(string $phoneNumber, string $message)
+    {
+        if (!$this->baseUrl || !$phoneNumber) {
+            return;
+        }
+
+        $chatId = $phoneNumber . '@c.us';
+
+        $payload = [
+            'session' => $this->sessionName,
+            'chatId' => $chatId,
+            'text' => $message,
+        ];
+        
+        Log::info('Mencoba mengirim TEKS SEDERHANA ke Waha.', ['payload_data' => $payload]);
+
+        Http::withHeaders(['X-Api-Key' => $this->apiKey])->post("{$this->baseUrl}/api/sendText", $payload);
+    }
 }

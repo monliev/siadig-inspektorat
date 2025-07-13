@@ -43,6 +43,9 @@
                     <x-nav-link :href="url('/dispositions-sent')" :active="request()->is('dispositions-sent')">
                         Disposisi Keluar
                     </x-nav-link>
+                    <x-nav-link :href="route('service-requests.index')" :active="request()->routeIs('service-requests.*')">
+                        {{ __('Permohonan Masuk') }}
+                    </x-nav-link>
                     {{-- Menu Khusus Admin --}}
                     @can('isAdmin')
                     <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -86,6 +89,9 @@
                                 </button>
                             </x-slot>
                             <x-slot name="content">
+                                <x-dropdown-link :href="route('required-documents.index')">
+                                    {{ __('Persyaratan Dokumen BT') }}
+                                </x-dropdown-link>
                                 <x-dropdown-link :href="route('document-categories.index')">
                                     {{ __('Kategori Dokumen') }}
                                 </x-dropdown-link>
@@ -104,6 +110,42 @@
                     @endcan
                     @endcan
                 </div>
+            </div>
+
+            <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <x-dropdown align="right" width="48">
+                    <x-slot name="trigger">
+                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                            <div>🔔</div>
+                            @if($unreadNotifications->count() > 0)
+                                <span class="ms-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">{{ $unreadNotifications->count() }}</span>
+                            @endif
+                        </button>
+                    </x-slot>
+
+                    <x-slot name="content">
+                        <div class="px-4 py-2 text-sm text-gray-700 font-semibold">
+                            Notifikasi
+                        </div>
+
+                        @forelse($unreadNotifications as $notification)
+                            <x-dropdown-link :href="$notification->data['url'] . '?read=' . $notification->id">
+                                <p class="font-bold">{{ $notification->data['applicant_name'] }}</p>
+                                <p class="text-sm">{{ $notification->data['message'] }}</p>
+                            </x-dropdown-link>
+                        @empty
+                            <div class="px-4 py-2 text-sm text-gray-500">
+                                Tidak ada notifikasi baru.
+                            </div>
+                        @endforelse
+                        
+                        <div class="border-t border-gray-200"></div>
+
+                        <x-dropdown-link href="#">
+                            Lihat Semua Notifikasi
+                        </x-dropdown-link>
+                    </x-slot>
+                </x-dropdown>
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">

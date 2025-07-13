@@ -15,10 +15,17 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('*', function ($view) {
             if (Auth::check()) {
+                // Logika disposisi yang sudah ada (TETAP ADA)
                 $unreadDispositionsCount = Disposition::where('to_user_id', Auth::id())
                                                       ->where('status', 'Terkirim')
                                                       ->count();
+                
+                // Logika notifikasi baru (KITA TAMBAHKAN)
+                $unreadNotifications = Auth::user()->unreadNotifications()->take(5)->get();
+
+                // Kirim kedua variabel ke semua view
                 $view->with('unreadDispositionsCount', $unreadDispositionsCount);
+                $view->with('unreadNotifications', $unreadNotifications);
             }
         });
     }

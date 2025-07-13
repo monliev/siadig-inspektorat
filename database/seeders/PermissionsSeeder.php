@@ -20,7 +20,11 @@ class PermissionsSeeder extends Seeder
             'create-disposition', 'view-disposition',
             'view-opd-requests',      // <-- TAMBAHAN BARU
             'process-opd-requests',   // <-- TAMBAHAN BARU
-            'view-opd-documents'      // <-- TAMBAHAN BARU
+            'view-opd-documents',      // <-- TAMBAHAN BARU
+            // --- PERMISSION BARU UNTUK LAYANAN ---
+            'view-service-requests',    // Izin untuk melihat daftar permohonan
+            'process-service-requests', // Izin untuk memproses (revisi/approve)
+            'assign-service-requests'  // Izin untuk menugaskan auditor
         ];
 
         foreach ($permissions as $permission) {
