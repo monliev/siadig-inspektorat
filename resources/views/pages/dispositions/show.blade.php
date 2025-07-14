@@ -29,15 +29,16 @@
                     </div>
                     {{-- Tombol Aksi Selesaikan dengan Modal --}}
                     <div>
-                        @if (($disposition->from_user_id == Illuminate\Support\Facades\Auth::id() ||
-                        $disposition->to_user_id == Illuminate\Support\Facades\Auth::id()) && $disposition->status !==
-                        'Selesai')
+                        {{-- PERBAIKAN: Gunakan @can untuk otorisasi --}}
+                        @can('markAsCompleted', $disposition)
+                        @if ($disposition->status !== 'Selesai')
                         <div x-data="{ open: false }">
                             <button @click="open = true"
                                 class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700">
                                 Selesaikan Disposisi
                             </button>
 
+                            {{-- Modal Konfirmasi --}}
                             <div x-show="open" x-transition.opacity style="display: none;"
                                 class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 p-4">
                                 <div @click.away="open = false"
@@ -67,6 +68,7 @@
                             </div>
                         </div>
                         @endif
+                        @endcan
                     </div>
                 </div>
                 <div class="mt-4 p-4 bg-gray-50 rounded-md border">

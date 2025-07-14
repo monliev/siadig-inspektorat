@@ -22,13 +22,15 @@ class DispositionPolicy
     public function view(User $user, Disposition $disposition): bool
     {
         // Izinkan jika user adalah pengirim ATAU penerima disposisi
-        return $user->id === $disposition->from_user_id || $user->id === $disposition->to_user_id;
+        // Cara baru yang benar
+        return $disposition->recipients->contains($user);
     }
 
     public function createResponse(User $user, Disposition $disposition): bool
     {
         // Izinkan JIKA user adalah pengirim ASLI ATAU penerima ASLI dari disposisi ini.
-        return $user->id === $disposition->from_user_id || $user->id === $disposition->to_user_id;
+        // Cara baru yang benar
+        return $disposition->recipients->contains($user);
     }
 
     /**

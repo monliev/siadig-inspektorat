@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,7 +15,7 @@ class Disposition extends Model
     protected $fillable = [
         'document_id',
         'from_user_id',
-        'to_user_id',
+        //'to_user_id',
         'instructions',
         'status',
         'closing_note',
@@ -34,7 +35,15 @@ class Disposition extends Model
         'token_expires_at' => 'datetime',
         'token_used_at' => 'datetime',
     ];
-
+    
+    /**
+     * Relasi BARU: Satu disposisi bisa memiliki BANYAK penerima (user).
+     */
+    public function recipients(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'disposition_user');
+    }
+    
     public function document(): BelongsTo
     {
         return $this->belongsTo(Document::class);
@@ -43,11 +52,6 @@ class Disposition extends Model
     public function fromUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'from_user_id');
-    }
-
-    public function toUser(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'to_user_id');
     }
 
     public function responses(): HasMany

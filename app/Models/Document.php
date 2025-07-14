@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Document extends Model
 {
@@ -72,6 +73,10 @@ class Document extends Model
         return $this->belongsTo(Entity::class, 'to_entity_id');
     }
 
+    /**
+     * Relasi ke banyak disposisi.
+     * Pastikan return type-nya adalah 'HasMany' dari Illuminate.
+     */
     public function dispositions(): HasMany
     {
         return $this->hasMany(Disposition::class);

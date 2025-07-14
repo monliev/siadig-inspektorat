@@ -27,7 +27,14 @@
                                         {{ $disposition->document->title }}
                                     </a>
                                 </td>
-                                <td class="py-3 px-4">{{ $disposition->toUser->name }}</td>
+                                <td class="py-3 px-4">
+                                    {{-- Loop melalui semua penerima dan tampilkan namanya --}}
+                                    @foreach($disposition->recipients as $recipient)
+                                        <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+                                            {{ $recipient->name }}
+                                        </span>
+                                    @endforeach
+                                </td>
                                 <td class="py-3 px-4">{{ $disposition->created_at->translatedFormat('d M Y') }}</td>
                                 <td class="text-center py-3 px-4">
 

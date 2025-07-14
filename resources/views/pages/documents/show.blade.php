@@ -55,49 +55,47 @@
                         {{-- Tombol Disposisi di Kanan --}}
                         @can('can-disposition')
                         <div x-data="{ open: false }">
-                            <button @click="open = true"
-                                class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500">Disposisi
-                                Dokumen</button>
-                            <div x-show="open" x-transition.opacity style="display: none;"
-                                class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 p-4">
-                                <div @click.away="open = false"
-                                    class="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg mx-4">
-                                    <h3 class="text-lg font-medium text-gray-900 mb-4">Formulir Disposisi</h3>
-                                    <form action="{{ route('dispositions.store', $document->id) }}" method="POST">
-                                        @csrf
-                                        <div class="mb-4">
-                                            <label for="to_user_id"
-                                                class="block text-sm font-medium text-gray-700">Tujuan Disposisi</label>
-                                            <select name="to_user_id" id="to_user_id"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
-                                                <option value="">-- Pilih Pegawai --</option>
-                                                @foreach ($internalUsers as $user)
-                                                <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->jabatan }}
-                                                </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="mb-4">
-                                            <label for="instructions"
-                                                class="block text-sm font-medium text-gray-700">Instruksi /
-                                                Catatan</label>
-                                            <textarea name="instructions" id="instructions" rows="4"
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"
-                                                required></textarea>
-                                        </div>
-                                        <div class="flex justify-end space-x-2 mt-6">
-                                            <button type="button" @click="open = false"
-                                                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Batal</button>
-                                            <button type="submit"
-                                                class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500">Kirim
-                                                Disposisi</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        @endcan
+    <button @click="open = true" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500">
+        Buat Disposisi
+    </button>
+
+    <div x-show="open" x-transition.opacity style="display: none;" class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 p-4">
+        
+        {{-- REVISI: class 'rounded-lg' dihapus dari div ini untuk membuatnya kotak --}}
+        <div @click.away="open = false" class="bg-white shadow-xl p-6 w-full max-w-lg mx-4">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Formulir Disposisi</h3>
+            
+            <form action="{{ route('dispositions.store', $document->id) }}" method="POST">
+                @csrf
+                
+                {{-- REVISI: Bagian dropdown 'roles' dihapus --}}
+
+                <div class="mb-4">
+                    <label for="users" class="block text-sm font-medium text-gray-700">Kirim ke Pegawai (Bisa Pilih Banyak)</label>
+                    <select name="users[]" id="users" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" multiple required>
+                        @foreach($internalUsers as $user)
+                            <option value="{{ $user->id }}">{{ $user->name }} - {{ $user->jabatan }}</option>
+                        @endforeach
+                    </select>
+                    <small class="form-text text-muted">Tahan Ctrl (atau Cmd di Mac) untuk memilih lebih dari satu.</small>
+                </div>
+
+                <div class="mb-4">
+                    <label for="instructions" class="block text-sm font-medium text-gray-700">Instruksi / Catatan</label>
+                    <textarea name="instructions" id="instructions" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button type="button" @click="open = false" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-500">Kirim Disposisi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+                    @endcan
                     </div>
+
 
                     {{-- Detail Dokumen dalam bentuk tabel --}}
                     <div class="border-t border-gray-200 mt-6">
@@ -124,8 +122,7 @@
                             </div>
                             <div class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                 <dt class="text-sm font-medium text-gray-500">Deskripsi</dt>
-                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 whitespace-pre-wrap">
-                                    {{ $document->description ?? '-' }}</dd>
+                                <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2 whitespace-pre-wrap">{{ $document->description ?? '-' }}</dd>
                             </div>
                             <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                 <dt class="text-sm font-medium text-gray-500">Diunggah Oleh</dt>

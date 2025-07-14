@@ -7,6 +7,8 @@ use App\Models\Document;
 use App\Models\DocumentCategory;
 use App\Models\Entity;
 use App\Models\User;
+use App\Http\Controllers\RoleController;
+use App\Models\Role;
 
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -156,42 +158,30 @@ class DocumentController extends Controller
             ->take(10)
             ->get();
 
-        // Ambil daftar pengguna internal untuk tujuan disposisi
+        // Ambil daftar peran untuk dijadikan grup/tim
+        $roles = Role::whereNotIn('name', ['Klien Eksternal', 'Pemohon'])->orderBy('name')->get();
+        
+        // Ambil semua pengguna internal untuk pilihan individual
         $internalUsers = User::whereHas('role', function($q){
-            $q->where('name', '!=', 'Klien Eksternal');
+            $q->whereNotIn('name', ['Klien Eksternal', 'Pemohon']);
         })->orderBy('name')->get();
 
-        // Tambahkan $internalUsers ke data yang dikirim ke view
-        return view('pages.documents.show', compact('document', 'activities', 'internalUsers')); 
+        return view('pages.documents.show', compact('document', 'activities', 'roles', 'internalUsers'));
+
     }
 
     public function showClientSubmission(Document $document)
     {
-        // Otorisasi untuk melihat dokumen
-        $this->authorize('view', $document);
-
-        // Catat aktivitas bahwa dokumen ini sedang direview
-        AuditTrail::create([
-            'user_id' => Auth::id(),
-            'document_id' => $document->id,
-            'action' => 'REVIEW_VIEW',
-            'description' => 'Membuka detail review untuk dokumen: ' . $document->title,
-        ]);
-
-        // Ambil riwayat aktivitas untuk dokumen ini
-        $activities = AuditTrail::where('document_id', $document->id)
-            ->with('user')
-            ->latest()
-            ->take(10)
-            ->get();
-
-        // Ambil daftar pengguna internal untuk tujuan disposisi
-        $internalUsers = User::whereHas('role', function($q){
-            $q->where('name', '!=', 'Klien Eksternal');
+        // Ambil daftar peran untuk dijadikan grup/tim
+        $roles = Role::whereNotIn('name', ['Klien Eksternal', 'Pemohon'])->orderBy('name')->get();
+    
+        // Ambil semua pengguna internal untuk pilihan individual
+        $internalUsers = User::whereHas('role', function ($q) {
+            $q->whereNotIn('name', ['Klien Eksternal', 'Pemohon']);
         })->orderBy('name')->get();
-
-        // Tambahkan $internalUsers ke data yang dikirim ke view
-        return view('pages.documents.show-client-submission', compact('document', 'activities', 'internalUsers')); 
+    
+        // Kirim semua data yang dibutuhkan ke view
+        return view('pages.documents.show-client-submission', compact('document', 'roles', 'internalUsers'));
     }
 
     /**

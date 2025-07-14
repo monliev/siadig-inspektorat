@@ -7,12 +7,14 @@ use App\Models\DispositionResponse;
 use App\Models\DispositionResponseAttachment;
 use App\Models\Document;
 use App\Models\User;
+use App\Models\Role; // Pastikan Role di-import
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use App\Services\WhatsAppService;
-use Illuminate\Support\Str;
 
 class DispositionController extends Controller
 {
@@ -21,10 +23,12 @@ class DispositionController extends Controller
      */
     public function index()
     {
-        $dispositions = Disposition::where('to_user_id', Auth::id())
-                                   ->with(['document', 'fromUser'])
-                                   ->latest()
-                                   ->paginate(15);
+        // PERBAIKAN: Menggunakan relasi many-to-many yang baru
+        $dispositions = auth()->user()->dispositions()
+            ->with(['document', 'fromUser'])
+            ->latest()
+            ->paginate(15);
+            
         return view('pages.dispositions.index', compact('dispositions'));
     }
 
@@ -34,9 +38,11 @@ class DispositionController extends Controller
     public function sent()
     {
         $dispositions = Disposition::where('from_user_id', Auth::id())
-                                   ->with(['document', 'toUser'])
-                                   ->latest()
-                                   ->paginate(15);
+                                      // PERBAIKAN: Mengganti toUser dengan recipients
+                                      ->with(['document', 'recipients'])
+                                      ->latest()
+                                      ->paginate(15);
+
         return view('pages.dispositions.sent', compact('dispositions'));
     }
 
@@ -46,43 +52,93 @@ class DispositionController extends Controller
     public function show(Disposition $disposition)
     {
         $this->authorize('view', $disposition);
-        if ($disposition->status == 'Terkirim' && $disposition->to_user_id == Auth::id()) {
-            $disposition->update(['status' => 'Dibaca']);
+
+        // PERBAIKAN: Logika status 'Dibaca' sekarang memeriksa koleksi recipients
+        if ($disposition->status == 'Terkirim' && $disposition->recipients->contains(auth()->user())) {
+            // Logika untuk menandai 'Dibaca' per user bisa lebih kompleks,
+            // untuk saat ini kita sederhanakan dengan tidak mengubah status utama.
         }
-        $disposition->load(['document.uploader', 'fromUser', 'toUser', 'responses.user', 'responses.attachments']);
+
+        // PERBAIKAN: Memuat relasi 'recipients' bukan 'toUser'
+        $disposition->load(['document.uploader', 'fromUser', 'recipients', 'responses.user', 'responses.attachments']);
+        
         return view('pages.dispositions.show', compact('disposition'));
     }
 
     /**
-     * Menyimpan disposisi baru.
+     * Menyimpan disposisi baru untuk banyak penerima.
      */
     public function store(Request $request, Document $document)
     {
-        if (!Auth::user()->can('can-disposition')) { abort(403); }
-
         $request->validate([
-            'to_user_id' => 'required|exists:users,id',
-            'instructions' => 'required|string',
+            'instructions' => 'required|string|min:5',
+            'roles' => 'nullable|array',
+            'users' => 'nullable|array',
         ]);
 
-        $disposition = Disposition::create([
-            'document_id' => $document->id,
-            'from_user_id' => Auth::id(),
-            'to_user_id' => $request->to_user_id,
-            'instructions' => $request->instructions,
-            'response_token' => Str::random(60), // Menggunakan panjang 60
-            'token_expires_at' => now()->addHours(8),
-        ]);
-        
-        try {
-            $magicLink = URL::temporarySignedRoute('dispositions.respond.magic', now()->addHours(8), ['token' => $disposition->response_token]);
-            $whatsapp = new WhatsAppService();
-            $whatsapp->sendNewDispositionNotification($disposition, $magicLink);
-        } catch (\Exception $e) {
-            Log::error('Gagal mengirim notifikasi WhatsApp: ' . $e->getMessage());
+        if (empty($request->roles) && empty($request->users)) {
+            return back()->with('error', 'Anda harus memilih minimal satu penerima disposisi.');
         }
 
-        return redirect()->route('dispositions.sent')->with('success', 'Disposisi berhasil dikirim.');
+        DB::beginTransaction();
+        try {
+            // Generate token untuk magic link sekali saja
+            $disposition = $document->dispositions()->create([
+                'from_user_id' => auth()->id(),
+                'instructions' => $request->instructions,
+                'status' => 'Terkirim',
+                'response_token' => Str::random(32),
+                'token_expires_at' => now()->addHours(24),
+            ]);
+
+            $recipientIds = [];
+            if ($request->filled('roles')) {
+                $usersInRoles = User::whereIn('role_id', $request->roles)->pluck('id');
+                $recipientIds = array_merge($recipientIds, $usersInRoles->all());
+            }
+            if ($request->filled('users')) {
+                $recipientIds = array_merge($recipientIds, $request->users);
+            }
+
+            $uniqueRecipientIds = array_unique($recipientIds);
+            $disposition->recipients()->attach($uniqueRecipientIds);
+
+            // =======================================================
+            // ## LOGIKA NOTIFIKASI WHATSAPP YANG BENAR ##
+            $recipients = User::find($uniqueRecipientIds);
+            $whatsapp = new WhatsAppService();
+
+            foreach ($recipients as $recipient) {
+                // Lewati jika penerima tidak punya nomor HP
+                if (!$recipient->phone_number) {
+                    continue;
+                }
+
+                try {
+                    // Buat magic link unik untuk setiap penerima
+                    $magicLink = URL::temporarySignedRoute(
+                        'dispositions.respond.magic',
+                        now()->addHours(24),
+                        ['token' => $disposition->response_token, 'user' => $recipient->id]
+                    );
+
+                    // Panggil method yang sudah ada di WhatsAppService Anda
+                    $whatsapp->sendNewDispositionNotification($disposition, $magicLink);
+                    
+                } catch (\Exception $e) {
+                    Log::error("Gagal kirim WA disposisi ke {$recipient->name}: " . $e->getMessage());
+                }
+            }
+            // =======================================================
+
+            DB::commit();
+
+            return back()->with('success', 'Disposisi berhasil dikirimkan ke ' . count($uniqueRecipientIds) . ' penerima.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -134,16 +190,14 @@ class DispositionController extends Controller
      */
     public function markAsCompleted(Request $request, Disposition $disposition)
     {
-        if (Auth::id() !== $disposition->from_user_id && Auth::id() !== $disposition->to_user_id) {
-            abort(403);
-        }
-
+        // PERBAIKAN: Menggunakan Policy untuk otorisasi
+        $this->authorize('markAsCompleted', $disposition);
+    
         $disposition->update([
             'status' => 'Selesai',
             'closing_note' => $request->input('closing_note')
         ]);
-
-        // Kembali ke halaman detail disposisi yang baru saja diselesaikan
+    
         return redirect()->route('dispositions.show', $disposition->id)->with('success', 'Disposisi telah ditandai selesai.');
     }
     
@@ -165,23 +219,30 @@ class DispositionController extends Controller
      */
     public function storePublicResponse(Request $request)
     {
+        // PERBAIKAN: Menghapus referensi to_user_id
         $request->validate([
             'response_token' => 'required|string|exists:dispositions,response_token',
+            'user_id' => 'required|integer|exists:users,id', // Validasi user ID
             'notes' => 'required|string',
             'attachments.*' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,jpg,png,zip,rar|max:10240'
         ]);
-
+    
         $disposition = Disposition::where('response_token', $request->response_token)->firstOrFail();
+    
         if ($disposition->token_used_at || ($disposition->token_expires_at && $disposition->token_expires_at->isPast())) {
             abort(403, 'Link ini sudah tidak berlaku.');
         }
-
+    
+        if (!$disposition->recipients->contains($request->user_id)) {
+            abort(403, 'Anda tidak memiliki izin untuk merespons disposisi ini.');
+        }
+    
         $response = DispositionResponse::create([
             'disposition_id' => $disposition->id,
-            'user_id' => $disposition->to_user_id,
+            'user_id' => $request->user_id, // Menggunakan user_id dari request
             'notes' => $request->notes,
         ]);
-
+    
         if ($request->hasFile('attachments')) {
             foreach ($request->file('attachments') as $file) {
                 $fileName = time() . '_' . $file->getClientOriginalName();

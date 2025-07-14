@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -54,6 +55,14 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Relasi BARU: Satu user bisa menerima BANYAK disposisi.
+     */
+    public function dispositions(): BelongsToMany
+    {
+        return $this->belongsToMany(Disposition::class, 'disposition_user');
+    }
+
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
@@ -72,11 +81,6 @@ class User extends Authenticatable
     public function sentDispositions(): HasMany
     {
         return $this->hasMany(Disposition::class, 'from_user_id');
-    }
-
-    public function receivedDispositions(): HasMany
-    {
-        return $this->hasMany(Disposition::class, 'to_user_id');
     }
 
      public function dispositionResponses(): HasMany
