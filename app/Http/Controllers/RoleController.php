@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Permission;
 
 class RoleController extends Controller
 {
@@ -13,7 +12,7 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::latest()->paginate(10); // Diubah agar lebih rapi dengan paginasi
+        $roles = Role::latest()->paginate(10);
         return view('pages.roles.index', compact('roles'));
     }
 
@@ -30,20 +29,13 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        // Validasi input
         $request->validate([
             'name' => 'required|string|max:50|unique:roles,name',
             'description' => 'nullable|string',
         ]);
 
-        // Simpan data baru
-        Role::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'guard_name' => 'web' // <-- TAMBAHKAN BARIS INI
-        ]);
+        Role::create($request->all());
 
-        // Kembali ke halaman daftar dengan pesan sukses
         return redirect()->route('roles.index')->with('success', 'Role baru berhasil ditambahkan.');
     }
 
@@ -52,7 +44,7 @@ class RoleController extends Controller
      */
     public function show(Role $role)
     {
-        // Tidak digunakan saat ini
+        // Biasanya tidak digunakan untuk manajemen simpel, bisa dikosongkan.
     }
 
     /**
@@ -60,23 +52,24 @@ class RoleController extends Controller
      */
     public function edit(Role $role)
     {
-        $permissions = Permission::all();
-        $rolePermissions = $role->permissions->pluck('name')->toArray();
-        return view('pages.roles.edit', compact('role', 'permissions', 'rolePermissions'));
+        // Hanya mengirim data role, tanpa permissions.
+        return view('pages.roles.edit', compact('role'));
     }
 
+    /**
+     * Menyimpan perubahan pada role.
+     */
     public function update(Request $request, Role $role)
     {
         $request->validate([
             'name' => 'required|string|max:50|unique:roles,name,' . $role->id,
             'description' => 'nullable|string',
-            'permissions' => 'nullable|array',
         ]);
 
+        // Hanya update nama dan deskripsi.
         $role->update($request->only('name', 'description'));
-        $role->syncPermissions($request->input('permissions', []));
 
-        return redirect()->route('roles.index')->with('success', 'Role dan hak akses berhasil diperbarui.');
+        return redirect()->route('roles.index')->with('success', 'Role berhasil diperbarui.');
     }
 
     /**

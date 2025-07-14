@@ -11,13 +11,13 @@
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     @auth
                     {{-- Logika untuk KLIEN EKSTERNAL (OPD/DESA) --}}
-                    @if(auth()->user()->hasRole('Klien Eksternal'))
+                    @if(auth()->user()->role === 'Klien Eksternal')
                     <x-nav-link :href="route('client.dashboard')" :active="request()->routeIs('client.*')">
                         {{ __('Dashboard Klien') }}
                     </x-nav-link>
 
                     {{-- Logika untuk PEMOHON (PNS) --}}
-                    @elseif(auth()->user()->hasRole('Pemohon'))
+                    @elseif(auth()->user()->role === 'Pemohon')
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
@@ -42,15 +42,7 @@
                         Disposisi Keluar
                     </x-nav-link>
 
-                    @can('view-service-requests')
-                    <x-nav-link :href="route('service-requests.index')"
-                        :active="request()->routeIs('service-requests.*')">
-                        {{ __('Permohonan SKBT') }}
-                    </x-nav-link>
-                    @endcan
-
-                    {{-- Dropdown Menu yang memerlukan izin spesifik (otomatis tampil untuk Super Admin) --}}
-                    @canany(['view-users', 'view-roles'])
+                    @can('isAdmin')
                     <div class="hidden sm:flex sm:items-center sm:ms-6">
                         <x-dropdown align="right" width="48">
                             <x-slot name="trigger">
@@ -67,27 +59,32 @@
                             </x-slot>
                             <x-slot name="content">
                                 <div class="px-4 py-2 text-xs text-gray-400">Permintaan Dokumen OPD</div>
-                                <x-dropdown-link :href="route('document-requests.index')"> {{ __('Kelola Permintaan') }}
-                                </x-dropdown-link>
                                 <x-dropdown-link :href="route('documents.client_submissions')">
                                     {{ __('Daftar Dokumen OPD') }} </x-dropdown-link>
+                                <x-dropdown-link :href="route('document-requests.index')">
+                                    {{ __('Kelola Permintaan OPD') }} </x-dropdown-link>
+
+                                <div class="border-t border-gray-200"></div>
+                                <div class="px-4 py-2 text-xs text-gray-400">Permintaan Dokumen OPD</div>
+                                <x-dropdown-link :href="route('required-documents.index')"> {{ __('Persyaratan SKBT') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('service-requests.index')"> {{ __('Permohonan SKBT') }}
+                                </x-dropdown-link>
 
                                 <div class="border-t border-gray-200"></div>
                                 <div class="px-4 py-2 text-xs text-gray-400">Master Data</div>
+                                <x-dropdown-link :href="route('document-categories.index')">
+                                    {{ __('Kategori Dokumen') }} </x-dropdown-link>
+                                <x-dropdown-link :href="route('entities.index')"> {{ __('Manajemen OPD') }}
+                                </x-dropdown-link>
                                 <x-dropdown-link :href="route('users.index')"> {{ __('Manajemen Pengguna') }}
                                 </x-dropdown-link>
                                 <x-dropdown-link :href="route('roles.index')"> {{ __('Kelola Peran') }}
                                 </x-dropdown-link>
-                                <x-dropdown-link :href="route('entities.index')"> {{ __('Manajemen OPD') }}
-                                </x-dropdown-link>
-                                <x-dropdown-link :href="route('document-categories.index')">
-                                    {{ __('Kategori Dokumen') }} </x-dropdown-link>
-                                <x-dropdown-link :href="route('required-documents.index')"> {{ __('Persyaratan SKBT') }}
-                                </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
                     </div>
-                    @endcanany
+                    @endcan
                     @endif
                     @endauth
                 </div>
@@ -183,7 +180,10 @@
 
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
 
-        @hasanyrole('Super Admin|Admin Arsip|Pejabat Struktural|Auditor')
+        {{-- ====================================================== --}}
+        {{-- MENU MOBILE UNTUK PENGGUNA INTERNAL --}}
+        {{-- ====================================================== --}}
+        @if(in_array(auth()->user()->role, ['Super Admin', 'Admin Arsip', 'Pejabat Struktural', 'Auditor']))
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
@@ -195,25 +195,30 @@
                 :active="request()->routeIs('dispositions.index')">
                 {{ __('Disposisi Masuk') }}
             </x-responsive-nav-link>
-
-            @can('view-service-requests')
             <x-responsive-nav-link :href="route('service-requests.index')"
                 :active="request()->routeIs('service-requests.*')">
                 {{ __('Permohonan SKBT') }}
             </x-responsive-nav-link>
-            @endcan
         </div>
-        @endhasanyrole
+        @endif
 
-        @hasrole('Klien Eksternal')
+
+        {{-- ====================================================== --}}
+        {{-- MENU MOBILE UNTUK KLIEN EKSTERNAL (OPD/DESA) --}}
+        {{-- ====================================================== --}}
+        @if(auth()->user()->role === 'Klien Eksternal')
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('client.dashboard')" :active="request()->routeIs('client.*')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
         </div>
-        @endhasrole
+        @endif
 
-        @hasrole('Pemohon')
+
+        {{-- ====================================================== --}}
+        {{-- MENU MOBILE UNTUK PEMOHON (PNS) --}}
+        {{-- ====================================================== --}}
+        @if(auth()->user()->role === 'Pemohon')
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
@@ -223,7 +228,7 @@
                 {{ __('Ajukan Permohonan') }}
             </x-responsive-nav-link>
         </div>
-        @endhasrole
+        @endif
 
 
         <div class="pt-4 pb-1 border-t border-gray-200">

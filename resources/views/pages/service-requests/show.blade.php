@@ -7,7 +7,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-
             <div class="md:col-span-2 space-y-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
@@ -20,6 +19,41 @@
                                 class="font-semibold text-blue-600">{{ $serviceRequest->status }}</span></p>
                     </div>
                 </div>
+
+                @can('assign-service-requests')
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mt-6">
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Tugaskan Auditor</h3>
+
+                        <form action="{{ route('service-requests.assign', $serviceRequest->id) }}" method="POST">
+                            @csrf
+                            <label for="handler_user_id" class="block font-medium text-sm text-gray-700">Pilih
+                                Penanggung Jawab (PIC)</label>
+                            <select name="handler_user_id" id="handler_user_id"
+                                class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                                <option value="">-- Pilih Auditor --</option>
+                                @foreach($auditors as $auditor)
+                                <option value="{{ $auditor->id }}"
+                                    {{ $serviceRequest->handler_user_id == $auditor->id ? 'selected' : '' }}>
+                                    {{ $auditor->name }}
+                                </option>
+                                @endforeach
+                            </select>
+
+                            <div class="mt-4">
+                                <button type="submit"
+                                    class="inline-flex items-center px-4 py-2 bg-slate-700 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-slate-600">
+                                    Simpan Penugasan
+                                </button>
+                            </div>
+                        </form>
+                        @if($serviceRequest->handler)
+                        <p class="text-sm text-gray-500 mt-3">Saat ini ditangani oleh:
+                            <strong>{{ $serviceRequest->handler->name }}</strong></p>
+                        @endif
+                    </div>
+                </div>
+                @endcan
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">

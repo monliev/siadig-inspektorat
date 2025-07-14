@@ -2,21 +2,12 @@
 
 namespace App\Models;
 
-// Ganti 'use Illuminate\Database\Eloquent\Model;' dengan ini:
-use Spatie\Permission\Models\Role as SpatieRole;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-// Ganti 'class Role extends Model' dengan ini:
-class Role extends SpatieRole
+class Role extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'description',
-        'guard_name', // Pastikan guard_name ada di sini
-    ];
+    use HasFactory;
 
+    protected $fillable = ['name', 'description'];
 }

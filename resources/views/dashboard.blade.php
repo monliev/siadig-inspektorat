@@ -73,40 +73,42 @@
                     </div>
                 </div>
 
+                {{-- Bagian Aktivitas --}}
+            <div class="space-y-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         @can('isAdmin')
                         {{-- Jika Admin, tampilkan log semua user --}}
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Log Aktivitas Terbaru (Semua Pengguna)</h3>
                         <div class="space-y-4">
-                            @forelse ($allActivities as $activity)
-                            <div class="border-b pb-2">
-                                <p class="font-semibold text-gray-800">{{ $activity->description }}</p>
-                                <p class="text-sm text-gray-500 mt-1">
-                                    oleh {{ $activity->user->name ?? 'Sistem' }} -
-                                    {{ $activity->created_at->diffForHumans() }}
-                                </p>
-                            </div>
+                            @forelse ($allActivities ?? [] as $activity)
+                                <div class="border-b pb-2">
+                                    <p class="font-semibold text-gray-800">{{ $activity->description }}</p>
+                                    <p class="text-sm text-gray-500 mt-1">
+                                        oleh {{ $activity->user->name ?? 'Sistem' }} - {{ $activity->created_at->diffForHumans() }}
+                                    </p>
+                                </div>
                             @empty
-                            <p class="text-center text-gray-500">Belum ada aktivitas tercatat.</p>
+                                <p class="text-center text-gray-500">Belum ada aktivitas tercatat.</p>
                             @endforelse
                         </div>
                         @else
                         {{-- Jika bukan Admin, tampilkan log pribadi --}}
                         <h3 class="text-lg font-medium text-gray-900 mb-4">Aktivitas Terakhir Anda</h3>
                         <div class="space-y-4">
-                            @forelse ($userActivities as $activity)
-                            <div class="border-b pb-2">
-                                <p class="font-semibold text-gray-800">{{ $activity->description }}</p>
-                                <p class="text-sm text-gray-500 mt-1">{{ $activity->created_at->diffForHumans() }}</p>
-                            </div>
+                             @forelse ($userActivities ?? [] as $activity)
+                                <div class="border-b pb-2">
+                                    <p class="font-semibold text-gray-800">{{ $activity->description }}</p>
+                                    <p class="text-sm text-gray-500 mt-1">{{ $activity->created_at->diffForHumans() }}</p>
+                                </div>
                             @empty
-                            <p class="text-center text-gray-500">Belum ada aktivitas tercatat.</p>
+                                <p class="text-center text-gray-500">Belum ada aktivitas tercatat.</p>
                             @endforelse
                         </div>
                         @endcan
                     </div>
                 </div>
+            </div>
             </div>
 
         </div>
