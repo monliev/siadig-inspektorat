@@ -3,7 +3,6 @@
 Selamat datang di repository SIADIG, sebuah aplikasi web yang dirancang untuk mendigitalisasi dan mengoptimalkan alur kerja administrasi di lingkungan Inspektorat.
 
 ![Screenshot Dashboard](https://i.ibb.co/wN4VLRJ5/image.png) 
-*(Catatan: Ganti URL di atas dengan link ke salah satu screenshot aplikasi Anda yang sudah diunggah)*
 
 ## 🚀 Latar Belakang
 
