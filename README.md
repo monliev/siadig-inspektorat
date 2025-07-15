@@ -1,61 +1,77 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SIADIG - Sistem Informasi Administrasi Digital Inspektorat
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Selamat datang di repository SIADIG, sebuah aplikasi web yang dirancang untuk mendigitalisasi dan mengoptimalkan alur kerja administrasi di lingkungan Inspektorat.
 
-## About Laravel
+![Screenshot Dashboard](https://i.ibb.co/wN4VLRJ5/image.png) 
+*(Catatan: Ganti URL di atas dengan link ke salah satu screenshot aplikasi Anda yang sudah diunggah)*
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Latar Belakang
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Aplikasi ini dibangun untuk mengatasi tantangan dalam manajemen dokumen, disposisi, dan layanan publik di Inspektorat Kabupaten Trenggalek. Tujuannya adalah untuk menciptakan sistem yang terpusat, transparan, dan efisien, mengurangi penggunaan kertas dan mempercepat proses birokrasi.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ✨ Fitur Utama
 
-## Learning Laravel
+Aplikasi ini memiliki tiga portal utama yang melayani kelompok pengguna yang berbeda:
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1.  **Portal Internal (Inspektorat):**
+    * **Manajemen Arsip:** Mengelola semua dokumen dan arsip internal secara digital.
+    * **Disposisi Multi-Penerima:** Mengirimkan instruksi atau edaran ke banyak pegawai, unit kerja (Irban), atau tim khusus secara bersamaan.
+    * **Manajemen Pengguna & Peran:** Mengatur hak akses untuk setiap pegawai (Super Admin, Admin Arsip, Pejabat Struktural, Auditor).
+    * **Permintaan Dokumen ke OPD:** Membuat dan melacak permintaan dokumen resmi ke entitas eksternal.
+    * **Log Viewer:** Memantau log teknis dan error aplikasi langsung dari antarmuka web (khusus Super Admin).
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+2.  **Portal Klien Eksternal (OPD/Desa):**
+    * Sebuah halaman login khusus bagi OPD dan Desa untuk menerima permintaan dokumen dari Inspektorat dan mengunggah dokumen balasan.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+3.  **Portal Layanan Publik (Permohonan SKBT):**
+    * **Registrasi Mandiri:** Fitur bagi PNS untuk mendaftar dan membuat akun.
+    * **Pengajuan Online:** Mengajukan permohonan Surat Keterangan Bebas Temuan (SKBT) dengan mengunggah dokumen persyaratan.
+    * **Pelacakan Status:** Pemohon dapat melihat progres permohonan mereka secara real-time (Baru, Butuh Revisi, Selesai).
+    * **Notifikasi WhatsApp:** Pemohon dan verifikator internal akan menerima notifikasi otomatis untuk setiap pembaruan status.
 
-## Laravel Sponsors
+## 🛠️ Teknologi yang Digunakan
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+* **Backend:** PHP, Laravel Framework
+* **Frontend:** Blade, Tailwind CSS, Alpine.js
+* **Database:** MySQL
+* **Notifikasi:** WAHA (WhatsApp HTTP API) Self-Hosted via Docker
 
-### Premium Partners
+## ⚙️ Instalasi & Setup Lokal
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Untuk menjalankan proyek ini di lingkungan lokal, ikuti langkah-langkah berikut:
 
-## Contributing
+1.  **Clone Repository:**
+    ```bash
+    git clone [https://github.com/monliev/siadig-inspektorat.git](https://github.com/monliev/siadig-inspektorat.git)
+    cd siadig
+    ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+2.  **Install Dependensi:**
+    ```bash
+    composer install
+    npm install
+    ```
 
-## Code of Conduct
+3.  **Setup Lingkungan:**
+    ```bash
+    cp .env.example .env
+    php artisan key:generate
+    ```
+    * *Sesuaikan konfigurasi database (`DB_*`) dan WAHA (`WAHA_*`) di dalam file `.env`.*
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4.  **Migrasi & Seeding Database:**
+    ```bash
+    php artisan migrate:fresh --seed
+    ```
 
-## Security Vulnerabilities
+5.  **Compile Aset & Jalankan Server:**
+    ```bash
+    npm run dev
+    php artisan serve
+    ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 📄 Lisensi
 
-## License
+Proyek ini dikembangkan untuk Inspektorat Kabupaten Trenggalek dan bersifat internal.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
