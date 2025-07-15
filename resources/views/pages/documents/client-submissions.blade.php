@@ -4,12 +4,6 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Dokumen Kiriman Klien') }}
             </h2>
-
-            {{-- PINDAHKAN TOMBOL KE SINI --}}
-            <a href="{{ route('documents.create') }}"
-                class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500">
-                + Unggah Dokumen
-            </a>
         </div>
     </x-slot>
 

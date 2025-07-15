@@ -23,7 +23,7 @@ class DispositionPolicy
     {
         // Izinkan jika user adalah pengirim ATAU penerima disposisi
         // Cara baru yang benar
-        return $disposition->recipients->contains($user);
+        return $user->id === $disposition->from_user_id || $disposition->recipients->contains($user);
     }
 
     public function createResponse(User $user, Disposition $disposition): bool

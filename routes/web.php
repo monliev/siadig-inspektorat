@@ -92,6 +92,10 @@ Route::middleware('auth')->group(function () {
     // Notifikasi
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
 
+    //tautan preview dokumen
+    Route::get('/documents/secure-stream/{document}', [DocumentController::class, 'stream'])
+        ->name('documents.stream')
+        ->middleware('signed');
     /*
     |--------------------------------------------------------------------------
     | RUMAH UNTUK PENGGUNA EKSTERNAL
@@ -125,8 +129,8 @@ Route::middleware('auth')->group(function () {
         Route::patch('/dispositions/{disposition}/complete', [DispositionController::class, 'markAsCompleted'])->name('dispositions.complete');
         Route::post('/dispositions/{disposition}/responses', [DispositionController::class, 'storeResponse'])->name('dispositions.responses.store');
         Route::get('/dispositions-sent', [DispositionController::class, 'sent'])->name('dispositions.sent');
-
-
+        Route::get('/documents/secure-stream/{document}', [DocumentController::class, 'stream'])->name('documents.stream')->middleware('signed');
+        
         // RUMAH UNTUK YANG BISA MEMBUAT DISPOSISI
         Route::middleware('can:can-disposition')->group(function() {
             Route::post('/documents/{document}/dispositions', [DispositionController::class, 'store'])->name('dispositions.store')->middleware('can:can-disposition');

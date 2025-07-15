@@ -1,4 +1,5 @@
 <x-app-layout>
+    <x-session-alert />
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Ruang Kerja Disposisi') }}
@@ -9,10 +10,6 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             @can('view', $disposition)
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <!-- <a href="{{ route('dispositions.index') }}" class="text-blue-600 hover:text-blue-800 font-semibold mb-4 inline-block">&larr; Kembali ke Disposisi Masuk</a>
-                <h3 class="text-lg font-medium text-gray-900">Instruksi dari: {{ $disposition->fromUser->name }}</h3>
-                <p class="mt-1 text-sm text-gray-600">Terkait Dokumen: <a href="{{ route('documents.show', $disposition->document_id) }}" class="text-blue-600" target="_blank">{{ $disposition->document->title }}</a></p>
-                 -->
                 <div class="flex justify-between items-start flex-wrap gap-4">
                     {{-- Informasi Disposisi --}}
                     <div>
@@ -27,6 +24,7 @@
                             </a>
                         </p>
                     </div>
+
                     {{-- Tombol Aksi Selesaikan dengan Modal --}}
                     <div>
                         {{-- PERBAIKAN: Gunakan @can untuk otorisasi --}}
@@ -76,6 +74,48 @@
                 </div>
             </div>
             @endcan
+            <div class="mt-6 bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Preview Dokumen Lampiran</h3>
+
+                    @php
+                    $document = $disposition->document;
+                    $extension = pathinfo($document->stored_path, PATHINFO_EXTENSION);
+
+                    // Buat URL sementara yang hanya berlaku selama 5 menit
+                    $secureFileUrl = Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    'documents.stream',
+                    now()->addMinutes(5),
+                    ['document' => $document->id]
+                    );
+                    @endphp
+
+                    @if(in_array(strtolower($extension), ['pdf']))
+                    {{-- Tampilkan PDF menggunakan tag <embed> atau <iframe> --}}
+                    <div class="border rounded-md overflow-hidden">
+                        <embed src="{{ $secureFileUrl }}" type="application/pdf" width="100%" height="700px" />
+                    </div>
+
+                    @elseif(in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif']))
+                    {{-- Tampilkan gambar menggunakan tag <img> --}}
+                    <div class="border rounded-md p-4">
+                        <img src="{{ $secureFileUrl }}" alt="Preview Dokumen" class="max-w-full h-auto mx-auto">
+                    </div>
+
+                    @else
+                    {{-- Jika bukan PDF atau gambar, tampilkan pesan untuk download --}}
+                    <div class="text-center bg-gray-100 p-8 rounded-md">
+                        <p class="font-semibold">Preview tidak tersedia untuk tipe file ini (.{{ $extension }}).
+                        </p>
+                        <p class="text-sm text-gray-600 mt-1">Silakan unduh dokumen untuk melihatnya.</p>
+                        <a href="{{ route('documents.download', $document->id) }}"
+                            class="mt-4 inline-block bg-indigo-600 text-white font-semibold px-4 py-2 rounded-md hover:bg-indigo-700">
+                            Unduh Dokumen
+                        </a>
+                    </div>
+                    @endif
+                </div>
+            </div>
 
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Riwayat Tanggapan & Tindak Lanjut</h3>

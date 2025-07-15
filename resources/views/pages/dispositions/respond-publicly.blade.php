@@ -1,14 +1,21 @@
 <x-guest-layout>
     <div class="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
+        {{-- TAMBAHKAN BLOK UNTUK MENAMPILKAN PESAN --}}
+        @if(session('error_message'))
+        <div class="mb-4 bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert">
+            <p class="font-bold">Gagal!</p>
+            <p>{{ session('error_message') }}</p>
+        </div>
+        @endif
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6">
                 <h2 class="text-2xl font-semibold mb-4 text-gray-800">Respons Disposisi</h2>
-
                 {{-- Informasi Disposisi --}}
                 <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
                     <p class="text-sm text-gray-500">Dari: <strong>{{ $disposition->fromUser->name }}</strong></p>
                     <p class="text-sm text-gray-500">Terkait Dokumen:
-                        <strong>{{ $disposition->document->title }}</strong></p>
+                        <strong>{{ $disposition->document->title }}</strong>
+                    </p>
                     <hr class="my-2">
                     <p class="text-gray-700 whitespace-pre-wrap">{{ $disposition->instructions }}</p>
                 </div>
@@ -17,8 +24,8 @@
                 <form action="{{ route('dispositions.respond.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     {{-- KIRIM TOKEN UNTUK VALIDASI --}}
-                    <input type="hidden" name="response_token" value="{{ $token }}">
-
+                    <input type="hidden" name="response_token" value="{{ $disposition->response_token }}">
+                    <input type="hidden" name="user_id" value="{{ $user->id }}">
                     <div class="mb-4">
                         <label for="notes" class="block text-sm font-medium text-gray-700">Tanggapan / Laporan
                             Progres</label>

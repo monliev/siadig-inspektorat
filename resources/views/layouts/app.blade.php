@@ -39,7 +39,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
-
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     {{-- Stack untuk script per halaman (seperti inisialisasi Tom Select) --}}
     @stack('scripts')
 </body>

@@ -8,6 +8,7 @@ use App\Models\Disposition;
 use App\Models\Document;
 use App\Models\DispositionResponse;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\URL;
 
 class WhatsAppService
 {
@@ -17,8 +18,13 @@ class WhatsAppService
 
     public function __construct()
     {
-        $this->baseUrl = env('WAHA_API_URL');
-        $this->apiKey = env('WAHA_API_KEY');
+    // Hapus sementara pembacaan dari .env
+    // $this->baseUrl = env('WAHA_API_URL');
+    // $this->apiKey = env('WAHA_API_KEY');
+
+    // 'Hardcode' langsung nilainya di sini untuk tes
+    $this->baseUrl = 'http://203.194.114.220:3000';
+    $this->apiKey = 'KunciRahasiaSuperAmanAnda';
     }
 
     /**
@@ -27,67 +33,58 @@ class WhatsAppService
     /**
      * Mengirim notifikasi disposisi baru ke SEMUA penerima.
      */
-    public function sendNewDispositionNotification(Disposition $disposition)
+    /**
+     * Mengirim notifikasi disposisi baru ke SATU penerima.
+     * Fungsi ini sekarang akan mengembalikan true jika berhasil, false jika gagal.
+     */
+    public function sendNewDispositionNotification(Disposition $disposition, User $recipient, string $magicLink): bool
     {
         // LOG 1: Memeriksa konfigurasi dasar
         if (!$this->baseUrl) {
             Log::error('[WA Service] GAGAL: Variabel WAHA_API_URL belum diatur di file .env.');
-            return;
+            return false; // Kembalikan false jika gagal
         }
 
-        // Ambil semua penerima dari relasi many-to-many yang baru
-        $recipients = $disposition->recipients;
-        // LOG 2: Memeriksa apakah penerima ditemukan
-        Log::info("[WA Service] Memulai pengiriman untuk Disposisi #{$disposition->id}. Ditemukan {$recipients->count()} penerima.");
+        if (!$recipient->phone_number) {
+            // LOG 2: Mencatat jika user yang dikirim tidak punya nomor HP
+            Log::warning("[WA Service] PENGGUNA DILEWATI: User '{$recipient->name}' (ID: {$recipient->id}) tidak memiliki nomor HP.");
+            return false; // Kembalikan false
+        }
 
-        // Lakukan perulangan untuk mengirim pesan ke setiap penerima
-        foreach ($recipients as $recipient) {
-            
-            if (!$recipient->phone_number) {
-                // LOG 3: Mencatat jika ada user yang dilewati
-                Log::warning("[WA Service] PENGGUNA DILEWATI: User '{$recipient->name}' (ID: {$recipient->id}) tidak memiliki nomor HP.");
-                continue;
-            }
+        // --- Membuat Pesan ---
+        $chatId = $recipient->phone_number . '@c.us';
+        $downloadLink = route('documents.download', $disposition->document->id);
+        
+        $message = "*Yth. {$recipient->name},*\n\n";
+        $message .= "Anda menerima disposisi baru dari: *{$disposition->fromUser->name}*.\n\n";
+        $message .= "*Terkait Dokumen:*\n{$disposition->document->title}\n\n";
+        $message .= "*Instruksi:*\n{$disposition->instructions}\n\n";
+        $message .= "*Silakan unduh file lampiran di link berikut:*\n{$downloadLink}\n\n";
+        $message .= "*Untuk merespons disposisi, silakan klik link sekali pakai di bawah ini (berlaku 24 jam):*\n" . $magicLink;
 
-            $chatId = $recipient->phone_number . '@c.us';
-            $downloadLink = route('documents.download', $disposition->document->id);
-            
-            // Buat magic link unik untuk setiap penerima
-            $magicLink = URL::temporarySignedRoute(
-                'dispositions.respond.magic', 
-                now()->addHours(24), 
-                ['token' => $disposition->response_token, 'user' => $recipient->id]
-            );
+        $payload = [
+            'session' => $this->sessionName,
+            'chatId' => $chatId,
+            'text' => $message,
+        ];
+        
+        Log::info("Mencoba mengirim notifikasi DISPOSISI BARU ke {$recipient->name}", ['payload_data' => $payload]);
 
-            // Personalisasi pesan untuk setiap penerima
-            $message = "*Yth. {$recipient->name},*\n\n";
-            $message .= "Anda menerima disposisi baru dari: *{$disposition->fromUser->name}*.\n\n";
-            $message .= "*Terkait Dokumen:*\n{$disposition->document->title}\n\n";
-            $message .= "*Instruksi:*\n{$disposition->instructions}\n\n";
-            $message .= "*Silakan unduh file lampiran di link berikut:*\n{$downloadLink}\n\n";
+        try {
+            $response = Http::withHeaders(['X-Api-Key' => $this->apiKey])->post("{$this->baseUrl}/api/sendText", $payload);
             
-            if ($magicLink) {
-                $message .= "*Untuk merespons disposisi, silakan klik link sekali pakai di bawah ini (berlaku 24 jam):*\n" . $magicLink;
+            // PERBAIKAN: Cek status respons dari Waha
+            if ($response->successful()) {
+                Log::info("[WA Service] Respons SUKSES dari Waha untuk {$recipient->name}: " . $response->body());
+                return true; // Berhasil
             } else {
-                $message .= "Silakan login ke aplikasi SIADIG untuk menindaklanjuti.";
+                Log::error("[WA Service] Respons GAGAL dari Waha untuk {$recipient->name}. Status: {$response->status()}. Body: " . $response->body());
+                return false; // Gagal
             }
 
-            $payload = [
-                'session' => $this->sessionName,
-                'chatId' => $chatId,
-                'text' => $message,
-            ];
-            
-            Log::info("Mencoba mengirim notifikasi DISPOSISI BARU ke {$recipient->name}", ['payload_data' => $payload]);
-
-            try {
-                $response = Http::withHeaders(['X-Api-Key' => $this->apiKey])->post("{$this->baseUrl}/api/sendText", $payload);
-                // LOG 5: Mencatat respons dari server Waha
-                Log::info("[WA Service] Respons dari Waha untuk {$recipient->name}: " . $response->body());
-            } catch (\Exception $e) {
-                // LOG 6: Mencatat jika terjadi error koneksi
-                Log::error("[WA Service] ERROR KONEKSI ke Waha: " . $e->getMessage());
-            }
+        } catch (\Exception $e) {
+            Log::error("[WA Service] ERROR KONEKSI ke Waha saat kirim ke {$recipient->name}: " . $e->getMessage());
+            return false; // Gagal karena error koneksi
         }
     }
     

@@ -56,6 +56,20 @@ class DocumentController extends Controller
         return view('pages.documents.index', compact('documents', 'categories', 'search'));
     }
 
+    public function stream(Document $document)
+    {
+        // Otorisasi, pastikan user yang meminta punya hak akses
+        $this->authorize('view', $document);
+
+        // Pastikan file ada di storage
+        if (!Storage::disk('public')->exists($document->stored_path)) {
+            abort(404);
+        }
+
+        // Kirim file langsung ke browser/viewer
+        return Storage::disk('public')->response($document->stored_path);
+    }
+
     /**
      * Menampilkan form untuk membuat dokumen baru.
      */
