@@ -41,7 +41,7 @@ Untuk menjalankan proyek ini di lingkungan lokal, ikuti langkah-langkah berikut:
 
 1.  **Clone Repository:**
     ```bash
-    git clone [https://github.com/monliev/siadig-inspektorat.git](https://github.com/monliev/siadig-inspektorat.git)
+    git clone https://github.com/monliev/siadig-inspektorat.git
     cd siadig
     ```
 
