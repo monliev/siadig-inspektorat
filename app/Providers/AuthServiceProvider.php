@@ -37,7 +37,18 @@ class AuthServiceProvider extends ServiceProvider
             }
         });
         
-        // --- DEFINISI SEMUA IZIN APLIKASI ---
+        // Gate untuk mengunduh dokumen
+        Gate::define('download-document', function (User $user, Document $document) {
+            // Izinkan jika user adalah pengunggah
+            if ($user->id === $document->uploaded_by) {
+                return true;
+            }
+
+            // Izinkan jika user adalah penerima disposisi dari dokumen ini
+            return $document->dispositions()->whereHas('recipients', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })->exists();
+        });
 
         // Aturan untuk level admin (Super Admin otomatis lolos karena Gate::before)
         Gate::define('isAdmin', function (User $user) {
@@ -66,7 +77,7 @@ class AuthServiceProvider extends ServiceProvider
 
         // Aturan untuk yang bisa membuat disposisi
         Gate::define('can-disposition', function (User $user) {
-            return $user->role && in_array($user->role->name, ['Admin Arsip', 'Pejabat Struktural', 'Auditor']);
+            return $user->role && in_array($user->role->name, ['Admin Arsip', 'Pejabat Struktural']);
         });
 
         // Aturan untuk yang bisa melihat statistik di dashboard

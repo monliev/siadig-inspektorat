@@ -1,5 +1,4 @@
 <x-app-layout>
-    <x-session-alert />
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Ruang Kerja Disposisi') }}
@@ -8,6 +7,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <x-session-alert />
             @can('view', $disposition)
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <div class="flex justify-between items-start flex-wrap gap-4">
@@ -15,7 +15,20 @@
                     <div>
                         <a href="{{ route('dispositions.index') }}"
                             class="text-blue-600 hover:text-blue-800 font-semibold mb-4 inline-block">&larr; Kembali</a>
-                        <h3 class="text-lg font-medium text-gray-900">Instruksi dari: {{ $disposition->fromUser->name }}
+                        <h3 class="text-lg font-medium text-gray-900">
+                            
+                            Dari: 
+                            <strong>
+                            {{-- Kode Baru yang Sudah Diperbaiki --}}
+                            @if($disposition->onBehalfOfUser)
+                                {{-- Jika disposisi dibuat atas nama pimpinan, tampilkan nama & jabatannya --}}
+                                <strong>{{ $disposition->onBehalfOfUser->name }} - {{ $disposition->onBehalfOfUser->jabatan }}</strong>
+                            @else
+                                {{-- Jika tidak, tampilkan nama & jabatan pengirim asli --}}
+                                <strong>{{ $disposition->fromUser->name }}</strong>
+                                <span class="block text-xs text-gray-500">{{ $disposition->fromUser->jabatan }}</span>
+                            @endif
+                            </strong>
                         </h3>
                         <p class="mt-1 text-sm text-gray-600">Terkait Dokumen:
                             <a href="{{ route('documents.show', $disposition->document_id) }}"

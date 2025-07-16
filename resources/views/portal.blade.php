@@ -106,7 +106,6 @@
 
         @include('layouts.partials.footer')
         @stack('modals')
-        @livewireScripts
 
     </div>
 </body>

@@ -14,11 +14,11 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 
 class DocumentController extends Controller
 {
-    // HAPUS FUNGSI __construct() YANG LAMA
-
+    
     /**
      * Menampilkan daftar semua dokumen.
      */
@@ -67,6 +67,18 @@ class DocumentController extends Controller
         }
 
         // Kirim file langsung ke browser/viewer
+        return Storage::disk('public')->response($document->stored_path);
+    }
+
+    public function publicStream(Document $document)
+    {
+        // Karena ini publik, kita tidak melakukan otorisasi berbasis user
+        // Keamanan sepenuhnya bergantung pada URL yang ditandatangani dan berbatas waktu.
+
+        if (!Storage::disk('public')->exists($document->stored_path)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
         return Storage::disk('public')->response($document->stored_path);
     }
 
@@ -180,7 +192,13 @@ class DocumentController extends Controller
             $q->whereNotIn('name', ['Klien Eksternal', 'Pemohon']);
         })->orderBy('name')->get();
 
-        return view('pages.documents.show', compact('document', 'activities', 'roles', 'internalUsers'));
+         // === PERBAIKAN: Mengambil daftar Pejabat Struktural dengan cara yang benar ===
+        $structuralUsers = \App\Models\User::whereHas('role', function($query) {
+            $query->where('name', 'Pejabat Struktural');
+        })->orderBy('name')->get();
+        // =======================================================================
+
+        return view('pages.documents.show', compact('document', 'activities', 'roles', 'internalUsers', 'structuralUsers'));
 
     }
 
@@ -249,20 +267,18 @@ class DocumentController extends Controller
      */
     public function download(Document $document)
     {
-        $this->authorize('view', $document);
-
-        if (Storage::disk('public')->exists($document->stored_path)) {
-            AuditTrail::create([
-                'user_id' => Auth::id(),
-                'document_id' => $document->id,
-                'action' => 'DOWNLOAD',
-                'description' => 'Mengunduh file: ' . $document->original_filename,
-            ]);
-
-            return Storage::disk('public')->download($document->stored_path, $document->original_filename);
+        // Gunakan Gate 'download-document' yang baru kita buat
+        if (Gate::denies('download-document', $document)) {
+            abort(403, 'Aksi tidak diizinkan.');
         }
 
-        return redirect()->back()->with('error', 'File tidak ditemukan.');
+        $filePath = $document->stored_path;
+
+        if (Storage::disk('public')->exists($filePath)) {
+            return Storage::disk('public')->download($filePath, $document->original_filename);
+        }
+
+        return back()->with('error', 'File tidak ditemukan di server.');
     }
 
     /**

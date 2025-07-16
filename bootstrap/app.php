@@ -12,7 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
-        // DAFTARKAN MIDDLEWARE CSRF ANDA DI SINI
+        // MIDDLEWARE NOTIFIKASI
+        $middleware->web(append: [
+            \App\Http\Middleware\MarkNotificationAsRead::class,
+        ]);
+
+        // MIDDLEWARE CSRF
         $middleware->web(append: [
             \App\Http\Middleware\VerifyCsrfToken::class,
         ]);

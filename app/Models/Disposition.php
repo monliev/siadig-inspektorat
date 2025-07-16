@@ -22,6 +22,7 @@ class Disposition extends Model
         'response_token',
         'token_expires_at',
         'token_used_at',
+        'on_behalf_of',
     ];
 
     /**
@@ -35,6 +36,14 @@ class Disposition extends Model
         'token_expires_at' => 'datetime',
         'token_used_at' => 'datetime',
     ];
+
+    /**
+     * Relasi ke user yang disposisinya diwakilkan.
+     */
+    public function onBehalfOfUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'on_behalf_of');
+    }
     
     /**
      * Relasi BARU: Satu disposisi bisa memiliki BANYAK penerima (user).

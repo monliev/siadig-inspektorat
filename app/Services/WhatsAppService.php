@@ -37,7 +37,9 @@ class WhatsAppService
      * Mengirim notifikasi disposisi baru ke SATU penerima.
      * Fungsi ini sekarang akan mengembalikan true jika berhasil, false jika gagal.
      */
-    public function sendNewDispositionNotification(Disposition $disposition, User $recipient, string $magicLink): bool
+    // Kode yang benar
+    public function sendNewDispositionNotification(Disposition $disposition, \App\Models\User $recipient, string $magicLink): bool
+
     {
         // LOG 1: Memeriksa konfigurasi dasar
         if (!$this->baseUrl) {
@@ -54,9 +56,12 @@ class WhatsAppService
         // --- Membuat Pesan ---
         $chatId = $recipient->phone_number . '@c.us';
         $downloadLink = route('documents.download', $disposition->document->id);
-        
+        $documentOrigin = $disposition->document->fromEntity->name ?? 'Dokumen Internal';
+        $pengirim = $disposition->fromUser;
+        $sender = $disposition->onBehalfOfUser ?? $disposition->fromUser;
+
         $message = "*Yth. {$recipient->name},*\n\n";
-        $message .= "Anda menerima disposisi baru dari: *{$disposition->fromUser->name}*.\n\n";
+        $message .= "Anda menerima disposisi baru dari: *{$sender->name}* ({$sender->jabatan}).\n\n";
         $message .= "*Terkait Dokumen:*\n{$disposition->document->title}\n\n";
         $message .= "*Instruksi:*\n{$disposition->instructions}\n\n";
         $message .= "*Silakan unduh file lampiran di link berikut:*\n{$downloadLink}\n\n";

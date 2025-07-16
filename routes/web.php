@@ -40,7 +40,7 @@ Route::get('/bantuan', [HelpController::class, 'index'])->name('help.index');
 Route::get('/layanan/skbt', [ServiceRequestController::class, 'showSkbtLandingPage'])->name('skbt.landing');
 Route::get('/disposition-response/{token}', [DispositionController::class, 'showViaMagicLink'])->middleware('signed')->name('dispositions.respond.magic');
 Route::post('/disposition-response/store', [DispositionController::class, 'storePublicResponse'])->name('dispositions.respond.store');
-
+Route::get('/documents/public-stream/{document}', [App\Http\Controllers\DocumentController::class, 'publicStream'])->middleware('signed')->name('documents.public-stream');
 
 // --- RUTE OTENTIKASI (Login, Register, dll) ---
 require __DIR__.'/auth.php';

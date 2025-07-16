@@ -109,19 +109,23 @@
                         </div>
 
                         @forelse($unreadNotifications as $notification)
-                        <x-dropdown-link :href="$notification->data['url'] . '?read=' . $notification->id">
-                            <p class="font-bold">{{ $notification->data['applicant_name'] }}</p>
-                            <p class="text-sm">{{ $notification->data['message'] }}</p>
-                        </x-dropdown-link>
+                            <x-dropdown-link :href="data_get($notification->data, 'url', '#') . '?read=' . $notification->id">
+                                {{-- Logika baru untuk menampilkan nama dengan benar --}}
+                                <p class="font-bold">
+                                    {{-- Cek jika 'applicant_name' ada, jika tidak, gunakan 'from_user_name', jika tidak ada juga, tampilkan 'Sistem' --}}
+                                    {{ $notification->data['applicant_name'] ?? $notification->data['from_user_name'] ?? 'Sistem' }}
+                                </p>
+                                <p class="text-sm">{{ $notification->data['message'] ?? 'Anda memiliki notifikasi baru.' }}</p>
+                            </x-dropdown-link>
                         @empty
-                        <div class="px-4 py-2 text-sm text-gray-500">
-                            Tidak ada notifikasi baru.
-                        </div>
+                            <div class="px-4 py-2 text-sm text-gray-500">
+                                Tidak ada notifikasi baru.
+                            </div>
                         @endforelse
 
                         <div class="border-t border-gray-200"></div>
 
-                        <x-dropdown-link href="#">
+                        <x-dropdown-link :href="route('notifications.index')">
                             Lihat Semua Notifikasi
                         </x-dropdown-link>
                     </x-slot>

@@ -14,7 +14,7 @@
 
                     {{-- Tombol Kembali --}}
                     <div class="mb-6">
-                        <a href="{{ url()->previous() }}" class="text-blue-600 hover:text-blue-800 font-semibold">
+                        <a href="{{ route('documents.index') }}" class="text-blue-600 hover:text-blue-800 font-semibold">
                             &larr; Kembali
                         </a>
                     </div>
@@ -101,7 +101,20 @@
 
                                         <form action="{{ route('dispositions.store', $document->id) }}" method="POST">
                                             @csrf
-
+                                            {{-- TAMBAHAN BARU: Dropdown "Disposisi Sebagai" --}}
+                                            @if(auth()->user()->role && in_array(auth()->user()->role->name, ['Super Admin', 'Admin Arsip']))
+                                            <div class="mb-4">
+                                                <label for="on_behalf_of" class="block text-sm font-medium text-gray-700">Disposisi Sebagai (Atas Nama)</label>
+                                                <select name="on_behalf_of" id="on_behalf_of" class="mt-1 block w-full ...">
+                                                    <option value="">-- Atas Nama Diri Sendiri --</option>
+                                                    {{-- Asumsi Anda mengirim daftar pimpinan bernama $structuralUsers dari controller --}}
+                                                    @foreach($structuralUsers as $pimpinan)
+                                                        <option value="{{ $pimpinan->id }}">{{ $pimpinan->name }} - {{ $pimpinan->jabatan }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <small class="form-text text-muted">Kosongkan jika mengirim atas nama Anda sendiri.</small>
+                                            </div>
+                                            @endif
                                             <div class="mb-4">
                                                 <label for="users" class="block text-sm font-medium text-gray-700">
                                                     Kirim ke Pegawai (Bisa Pilih Banyak)
